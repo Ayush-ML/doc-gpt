@@ -3,13 +3,12 @@
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder
 from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
 from imblearn.over_sampling import SMOTE
-from sklearn.impute import KNNImputer, SimpleImputer
+from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Load The Dataset
 
@@ -47,7 +46,9 @@ for index in missing_index:
 X = data.drop('stroke', axis=1)  # Features
 y = data['stroke']  # Target variable
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)  
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# TODO: Engineer new features
 
 # Turn Cleaned Data into Train and Test CSV Files
 
@@ -57,60 +58,36 @@ test = pd.concat([X_test, y_test], axis=1)
 train.to_csv("stroke/Processed/train/train.csv", index=False)
 test.to_csv("stroke/Processed/test/test.csv", index=False)
 
-# Use SimpleImputer respectively to fill missing values 
+# Create Preprocessing Pipelines for Numerical, Binary, and Categorical Features
+# Select Numerical, Binary , Categorical and Columns with Missing Values (likely only bmi and smoking_status)
 
-def imputation(X_train, X_test):
-    bmi_imputer = SimpleImputer(strategy='mean')
-    smoking_imputer = SimpleImputer(strategy='most_frequent')
+numeric_features = X.select_dtypes(include=['float64']).columns
+binary_cols = [col for col in X_train.columns if X_train[col].nunique() == 2]
+categorical_cols = [col for col in X_train.columns if X_train[col].nunique() > 2]
+categorical_cols = categorical_cols.select_dtypes(include="object")
+missing_cols = [col for col in X_train.columns if X_train[col].isnull().any()]
 
-    bmi_imputer.fit(X_train[['bmi']])
-    smoking_imputer.fit(X_train[['smoking_status']])
+# Create Pipelines for each type of feature
 
-    X_train['bmi'] = bmi_imputer.transform(X_train[['bmi']]).ravel()
-    X_test['bmi'] = bmi_imputer.transform(X_test[['bmi']]).ravel()
+data_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='mean'))
+])
+binary_transformer = Pipeline(steps=[
+    ('encoder', LabelEncoder())
+])
+categorical_transformer = Pipeline(steps=[
+    ('encoder', OneHotEncoder())
+])
+scaler = Pipeline(steps=[
+    ('scaler', StandardScaler())
+])
 
-    X_train['smoking_status'] = smoking_imputer.transform(X_train[['smoking_status']])
-    X_test['smoking_status'] = smoking_imputer.transform(X_test[['smoking_status']])
+preprocessor = ColumnTransformer(transformers=[ # Create a ColumnTransformer to combine these pipelines together
+    ('data', data_transformer, missing_cols),
+    ('binary', binary_transformer, binary_cols),
+    ('categorical', categorical_transformer, categorical_cols),
+    ('scaler', scaler, numeric_features)
+])
 
-    return X_train, X_test
 
-# TODO: Engineer new features
 
-# Encode Categorical Variables
-
-def encode(X_train, X_test):
-
-    binary_cols = [col for col in X_train.columns if X_train[col].nunique() == 2]
-    categorical_cols = [col for col in X_train.columns if X_train[col].nunique() > 2]
-    categorical_cols = X.select_dtypes(include="object")
-
-    for col in binary_cols:
-        encoder = LabelEncoder()
-        X_train[col] = encoder.fit_transform(X_train[col])
-        X_test[col] = encoder.transform(X_test[col])
-
-    X_train = pd.get_dummies(X_train, columns=[categorical_cols], drop_first=True)
-    X_test = pd.get_dummies(X_test, columns=[categorical_cols], drop_first=True)
-
-    X_train, X_test = X_train.align(X_test, join="left", axis=1, fill_value=0) # Align the train and test sets to have the same columns after one-hot encoding
-
-    return X_train, X_test
-
-# Scale Numerical Features
-
-def scale(X_train, X_test):
-    numerical_features = X.select_dtypes(include=['float64']).columns
-
-    scaler = StandardScaler()
-    scaler.fit(X_train[numerical_features])
-
-    X_train[numerical_features] = scaler.transform(X_train[numerical_features])
-    X_test[numerical_features] = scaler.transform(X_test[numerical_features])
-
-    return X_train, X_test
-
-# Beacuse Class Imbalance is very High, We will use SMOTE
-def apply_smote(X_train, y_train):
-    smote = SMOTE(random_state=42)
-    X_train, y_train = smote.fit_resample(X_train, y_train)
-    return X_train, y_train
