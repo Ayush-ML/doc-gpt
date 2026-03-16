@@ -7,7 +7,6 @@ from sklearn.preprocessing import KBinsDiscretizer, OrdinalEncoder, OneHotEncode
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-import joblib
 
 np.random.seed(42) # Set Random Seed for Reproducibility
 
@@ -55,4 +54,3 @@ preprocessor = ColumnTransformer(transformers=[ # Create a ColumnTransformer to 
     ('categorical', categorical_transformer, categorical_cols),
 ], remainder='passthrough')
 
-joblib.dump(preprocessor, r'stroke\src\saved\preprocessor.joblib') # Save the Preprocessor for later use in the model building and inference stages
