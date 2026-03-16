@@ -27,7 +27,7 @@ binary_cols = [col for col in binary_cols if X_train[col].nunique() == 2]
 categorical_cols = X_train.select_dtypes(include="object").columns
 categorical_cols = [col for col in categorical_cols if X_train[col].nunique() > 2]
 
-# Create Pipelines for each type of feature
+ # Create Pipelines for each type of feature
 
 bmi_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='mean'))
@@ -53,4 +53,3 @@ preprocessor = ColumnTransformer(transformers=[ # Create a ColumnTransformer to 
     ('binary', binary_transformer, binary_cols),
     ('categorical', categorical_transformer, categorical_cols),
 ], remainder='passthrough')
-
