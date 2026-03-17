@@ -12,11 +12,11 @@ np.random.seed(42) # Set Random Seed for Reproducibility
 
 # Load The Cleaned Dataset
 
-X_train = pd.read_csv(r'stroke\data\processed_data\train\X_train.csv')
-y_train = pd.read_csv(r'stroke\data\processed_data\train\y_train.csv')
+X_train = pd.read_csv(r'stroke\data\clean\train\X_train.csv')
+y_train = pd.read_csv(r'stroke\data\clean\train\y_train.csv').squeeze()
 
-X_test = pd.read_csv(r'stroke\data\processed_data\test\X_test.csv')
-y_test = pd.read_csv(r'stroke\data\processed_data\test\y_test.csv')
+X_test = pd.read_csv(r'stroke\data\clean\test\X_test.csv')
+y_test = pd.read_csv(r'stroke\data\clean\test\y_test.csv').squeeze()
 
 # Create Preprocessing Pipelines for Numerical, Binary, and Categorical Features
 # Select Numerical, Binary , Categorical and Columns with Missing Values (likely only bmi and smoking_status)
@@ -29,26 +29,20 @@ categorical_cols = [col for col in categorical_cols if X_train[col].nunique() > 
 
  # Create Pipelines for each type of feature
 
-bmi_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='mean'))
-])                                                   # Use 2 seperate Imputers with seperate strategies for the numerical BMI column and the categorical smoking_status column
-smoking_status_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='most_frequent'))
-])
 binary_transformer = Pipeline(steps=[
     ('encoder', OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1))
 ])
 categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
     ('encoder', OneHotEncoder(handle_unknown='ignore'))
 ])
-numerical_transformer = Pipeline(steps=[ # Use PolyNomialFeatures to create interaction and a discretionizer to split numerical columns into multiple features
+numerical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='mean')), # Use PolyNomialFeatures to create interaction and a discretionizer to split numerical columns into multiple features
     ('poly', PolynomialFeatures(interaction_only=True, include_bias=False)),
-    ('discretizer', KBinsDiscretizer(n_bins=4, encode='onehot-dense', strategy='quantile')),
+    ('discretizer', KBinsDiscretizer(n_bins=4, encode='onehot-dense', strategy='quantile', quantile_method='averaged_inverted_cdf')),
 ])
 
 preprocessor = ColumnTransformer(transformers=[ # Create a ColumnTransformer to combine these pipelines together
-    ('bmi', bmi_transformer, ['bmi']),
-    ('smoking_status', smoking_status_transformer, ['smoking_status']),
     ('numerical', numerical_transformer, numeric_features),
     ('binary', binary_transformer, binary_cols),
     ('categorical', categorical_transformer, categorical_cols),

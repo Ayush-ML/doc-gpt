@@ -1,0 +1,13 @@
+{
+    "skb__k": 15,
+    "stack__final_estimator__C": 0.01,
+    "stack__final_estimator__solver": "liblinear",
+    "stack__lgbm__min_child_samples": 50,
+    "stack__lgbm__num_leaves": 20,
+    "stack__rf__max_depth": 13,
+    "stack__rf__n_estimators": 205,
+    "stack__svc__C": 0.3378306320105071,
+    "stack__xgb__learning_rate": 0.03713032661768642,
+    "stack__xgb__max_depth": 4,
+    "stack__xgb__n_estimators": 167
+}
