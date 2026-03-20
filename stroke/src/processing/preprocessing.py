@@ -3,7 +3,7 @@
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import KBinsDiscretizer, OrdinalEncoder, OneHotEncoder, PolynomialFeatures
+from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, PolynomialFeatures, PowerTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -34,12 +34,12 @@ binary_transformer = Pipeline(steps=[
 ])
 categorical_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='most_frequent')),
-    ('encoder', OneHotEncoder(handle_unknown='ignore'))
+    ('encoder', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
 ])
 numerical_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='mean')), # Use PolyNomialFeatures to create interaction and a discretionizer to split numerical columns into multiple features
     ('poly', PolynomialFeatures(interaction_only=True, include_bias=False)),
-    ('discretizer', KBinsDiscretizer(n_bins=4, encode='onehot-dense', strategy='quantile', quantile_method='averaged_inverted_cdf')),
+    ('scaler', PowerTransformer(method='yeo-johnson')),
 ])
 
 preprocessor = ColumnTransformer(transformers=[ # Create a ColumnTransformer to combine these pipelines together
