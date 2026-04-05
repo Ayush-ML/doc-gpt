@@ -3,49 +3,61 @@
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy import stats
+from sklearn.model_selection import train_test_split
+from scipy.stats import boxcox, mstats
 
-# Load the dataset
+df = pd.read_csv(r'diabetes\data\raw\Dataset of Diabetes .csv', on_bad_lines='skip') # Load Dataset
 
-df = pd.read_csv('diabetes/data/diabetes.csv')
-df.columns = df.columns.str.strip()  # Remove leading and trailing whitespace from column names
-for col in df.columns:
-    df[col] = df[col].str.strip().str.lower() # Standardize Categorical Data by stripping whitespace, converting to lowercase
-df.drop(columns=['clinical_notes']) # Drop Columns Unecessary for cleaning
+df.columns = df.columns.str.strip().str.lower()  # Remove leading and trailing whitespace from column names and convert to lower case
+df = df.drop(columns=['id', 'no_pation'])  # Drop unnecessary columns
 
-# Analyze The Dataset
-
-print(df.head()) # View First 5 rows of the dataset
-print(df.info()) # Get information about the dataset
-print(df.describe(include='all')) # Get statistical summary of the dataset
-print(df.shape) # Get the shape of the dataset
-print(df.dtypes) # Get data types of each column
-print(df.select_dtypes(include=[np.number]).corr())
 categorical_columns = df.select_dtypes(include=['object']).columns
 for column in categorical_columns:
-    print(f"{column}: \n\t -- Unique values:{df[column].unique()} \n\t -- No. of Unique Values: {df[column].nunique()} \n\t -- Count of Each Unique Values: {df[column].value_counts().to_dict()}") # Get unique values, their counts and distributions in each column
-for column in df.columns:
-    missing_values = df[column].isnull()
-    print(f"{column}: \n\t -- No. of Missing Values: {missing_values.sum()} \n\t -- Percentage of Missing Values: {missing_values.mean() * 100}%") # Get number and percentage of missing values in each column
-# Use Graphs to Detect Anomalies and Identify Skew
-for column in df.select_dtypes(include=[np.number]).columns:
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-    
-    # Histogram + KDE
-    sns.histplot(df[column], bins=30, ax=axes[0], alpha=0.7, edgecolor='black', kde=True)
-    axes[0].set_title(f'{column} - Distribution')
-    
-    # Q-Q Plot
-    stats.probplot(df[column], dist="norm", plot=axes[1])
-    axes[1].set_title(f'{column} - Q-Q Plot')
-    
-    plt.tight_layout()
-    plt.savefig()
-    plt.show()
+    df[column] = df[column].str.strip().str.lower()  # Remove leading and trailing whitespace and Convert To lower case in categorical columns
 
-assert df['age'].between(0, 120).all(), "Age column contains Too High or Negative values, which is invalid." # Check for Negative Values in Age Column
-assert df['bmi'].between(10, 60).all(), "BMI column contains Too High or Too low values, which is invalid." # Check for Negative Values in BMI Column
-assert df['hbA1c_level'].between(1, 20).all(), "HbA1c Level column contains Too High or Too low values, which is invalid." # Check for Negative Values in HbA1c Level Column
-assert df['blood_glucose_level'].between(50, 500).all(), "Blood Glucose Level column contains Too High or Too low values, which is invalid." # Check for Negative Values in Blood Glucose Level Column
+# Did not remove duplicates because of Dataset Size and the fact that they may represent different patients with similar medical records, which is common in medical datasets.
+
+df['cr'] = df['cr'].astype('float64') # Convert 'cr' column to Float64
+
+# Fix Outliers, this dataset has mainly Right Skewed Distributions
+# So use a transformation based approach to treat outliers instead of dropping them
+# Columns that are skewed and have outliers: 
+    # --'cr' (Extremely right skewed)
+    # -- age' (left skewed)
+    # -- 'hdl' (Extremely right skewed)
+    # -- 'ldl' (Moderately right skewed)
+    # -- 'vldl' (Extremely right skewed)
+    # -- 'urea' (Highly right skewed)
+    # -- 'tg' (Highly right skewed)
+
+# Use Log Transform for Extremely Right Skewed Columns
+for column in ['cr', 'hdl', 'vldl']:
+    df[column] = np.log1p(df[column]) # log1p is used to handle zero values
+# Use Box-Cox Transform for Highly Right Skewed Columns
+for column in ['urea', 'tg']:
+    df[column], _ = boxcox(df[column] + 1)
+# Use Square Root Transform for Moderately Right Skewed Columns
+df['ldl'] = np.sqrt(df['ldl'])
+
+# Remove Leftover Outliers of Extremely Right Skewed Columns using IQR Method
+
+for column in ['cr', 'hdl', 'vldl']:
+    upper = df[column].quantile(0.99)
+    lower = df[column].quantile(0.01)
+    outliers = ((df[column] > upper) | (df[column] < lower)).sum()
+    if outliers > 0:
+        df[column] = df[column].clip(lower=lower, upper=upper)  # Cap outliers to the 1st and 99th percentiles
+
+# Split Dataset into X and y and further into train and test
+
+X = df.drop('class', axis=1)  # Features
+y = df['class']  # Target variable
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)  # Stratify to maintain class distribution in train and test sets
+
+# Turn Cleaned Data into Train and Test CSV Files
+
+X_train.to_csv(r"diabetes\data\clean\train\X_train.csv", index=False)
+X_test.to_csv(r"diabetes\data\clean\test\X_test.csv", index=False)
+y_train.to_csv(r"diabetes\data\clean\train\y_train.csv", index=False)
+y_test.to_csv(r"diabetes\data\clean\test\y_test.csv", index=False)
