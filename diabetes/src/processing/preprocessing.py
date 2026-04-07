@@ -23,14 +23,14 @@ y_test = pd.read_csv(r'diabetes\data\clean\test\y_test.csv').squeeze() # Squeeze
 X_train = pd.read_csv(r'diabetes\data\clean\train\X_train.csv')
 y_train = pd.read_csv(r'diabetes\data\clean\train\y_train.csv').squeeze()
 
-def preprocessor() -> ColumnTransformer: # This function is used to create a Preprocessor that can be used in a Pipeline with the model.
+def create_preprocessor(X: pd.DataFrame, y: pd.Series) -> ColumnTransformer: # This function is used to create a Preprocessor that can be used in a Pipeline with the model.
     # It returns a ColumnTransformer that applies the appropriate transformations to numerical and categorical features.
 
     # Identify Numerical and Categorical Columns
 
-    numerical = X_train.select_dtypes(include=['float64', 'int64']).columns
-    categorical = X_train.select_dtypes(include=['object']).columns
-    target = y_train.columns
+    numerical = X.select_dtypes(include=['float64', 'int64']).columns
+    categorical = X.select_dtypes(include=['object']).columns
+    target = y.name
 
     # Create Preprocessing Pipelines for Numerical and Categorical Columns
 
