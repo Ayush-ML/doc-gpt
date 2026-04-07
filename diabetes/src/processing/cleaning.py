@@ -13,7 +13,7 @@ from shutil import which
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from scipy.stats import boxcox, mstats
+from scipy.stats import boxcox
 
 df = pd.read_csv(r'diabetes\data\raw\Dataset of Diabetes .csv', on_bad_lines='skip') # Load Dataset
 
