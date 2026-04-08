@@ -2,11 +2,11 @@
 # This is used to build the pipeline of the model
 # Imported Libraries
 
-from sklearn.ensemble import LogisticRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import RFECV
 from sklearn.model_selection import StratifiedKFold
-from src.processing.preprocessing import create_preprocessor
+from diabetes.src.processing.preprocessing import create_preprocessor
 from xgboost import XGBClassifier
 import pandas as pd
 

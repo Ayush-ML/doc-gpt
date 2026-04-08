@@ -24,6 +24,8 @@ categorical_columns = df.select_dtypes(include=['object']).columns
 for column in categorical_columns:
     df[column] = df[column].str.strip().str.lower()  # Remove leading and trailing whitespace and Convert To lower case in categorical columns
 
+df['class'] = (df['class'].str.strip() == 'y').astype('int64') # Convert target variable to binary format (0 and 1)
+
 # Did not remove duplicates because of Dataset Size and the fact that they may represent different patients with similar medical records, which is common in medical datasets.
 
 # All Data Types are correct, so no need to fix data types
@@ -111,7 +113,8 @@ df['risk_score'] = (
 X = df.drop('class', axis=1)  # Features
 y = df['class']  # Target variable
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)  # Stratify to maintain class distribution in train and test sets
+X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.1, random_state=42, stratify=y)  # Stratify to maintain class distribution in train and test sets
+X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.1111, random_state=42, stratify=y_temp)  # Stratify to maintain class distribution in train and validation sets (also use 0.1111 as val size beacuse 0.1111 * 0.9 = 0.1)
 
 # Turn Cleaned Data into Train and Test CSV Files
 
@@ -119,3 +122,5 @@ X_train.to_csv(r"diabetes\data\clean\train\X_train.csv", index=False)
 X_test.to_csv(r"diabetes\data\clean\test\X_test.csv", index=False)
 y_train.to_csv(r"diabetes\data\clean\train\y_train.csv", index=False)
 y_test.to_csv(r"diabetes\data\clean\test\y_test.csv", index=False)
+X_val.to_csv(r"diabetes\data\clean\val\X_val.csv", index=False)
+y_val.to_csv(r"diabetes\data\clean\val\y_val.csv", index=False)

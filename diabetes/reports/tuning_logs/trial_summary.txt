@@ -1,0 +1,22 @@
+Optuna Tuning Study Summary
+===========================
+
+Study Name: xgb_tuning
+Direction: maximize
+Metric: ROC-AUC (binary classification)
+Total Trials: 50
+Best Trial Number: 2
+Best AUC Score: 0.999216
+
+Best Hyperparameters:
+  max_depth: 6
+  min_child_weight: 1
+  gamma: 1.5
+  lambda: 0.5
+  alpha: 0.30000000000000004
+  learning_rate: 0.08308867100591956
+  subsample: 0.7999999999999999
+  colsample_bytree: 1.0
+  n_estimators: 140
+
+Timestamp: 20260408_161248

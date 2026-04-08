@@ -1,0 +1,90 @@
+2026-04-08 15:04:28,857 - optuna.storages._in_memory - INFO - A new study created in memory with name: xgb_tuning
+2026-04-08 15:04:33,875 - optuna.study._optimize - WARNING - Trial 0 failed with parameters: {'max_depth': 5, 'min_child_weight': 3, 'gamma': 1.5, 'lambda': 1.5, 'alpha': 0.1, 'learning_rate': 0.06207090305742937, 'n_estimators': 100, 'subsample': 1.0, 'colsample_bytree': 0.8999999999999999, 'scale_pos_weight': 11} because of the following error: ValueError('\nAll the 5 fits failed.\nIt is very likely that your model is misconfigured.\nYou can try to debug the error by setting error_score=\'raise\'.\n\nBelow are more details about the failures:\n--------------------------------------------------------------------------------\n5 fits failed with the following error:\nTraceback (most recent call last):\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pandas\\core\\indexes\\base.py", line 3812, in get_loc\n    return self._engine.get_loc(casted_key)\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc\n  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc\n  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item\n  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item\nKeyError: \'class\'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\utils\\_indexing.py", line 443, in _get_column_indices\n    col_idx = all_columns.get_loc(col)\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pandas\\core\\indexes\\base.py", line 3819, in get_loc\n    raise KeyError(key) from err\nKeyError: \'class\'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\model_selection\\_validation.py", line 859, in _fit_and_score\n    estimator.fit(X_train, y_train, **fit_params)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\base.py", line 1365, in wrapper\n    return fit_method(estimator, *args, **kwargs)\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\pipeline.py", line 655, in fit\n    Xt = self._fit(X, y, routed_params, raw_params=params)\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\pipeline.py", line 589, in _fit\n    X, fitted_transformer = fit_transform_one_cached(\n                            ~~~~~~~~~~~~~~~~~~~~~~~~^\n        cloned_transformer,\n        ^^^^^^^^^^^^^^^^^^^\n    ...<5 lines>...\n        params=step_params,\n        ^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\joblib\\memory.py", line 326, in __call__\n    return self.func(*args, **kwargs)\n           ~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\pipeline.py", line 1540, in _fit_transform_one\n    res = transformer.fit_transform(X, y, **params.get("fit_transform", {}))\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\utils\\_set_output.py", line 316, in wrapped\n    data_to_wrap = f(self, X, *args, **kwargs)\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\base.py", line 1365, in wrapper\n    return fit_method(estimator, *args, **kwargs)\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\compose\\_column_transformer.py", line 988, in fit_transform\n    self._validate_column_callables(X)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\compose\\_column_transformer.py", line 541, in _validate_column_callables\n    transformer_to_input_indices[name] = _get_column_indices(X, columns)\n                                         ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File "C:\\Users\\KANNAN\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\sklearn\\utils\\_indexing.py", line 451, in _get_column_indices\n    raise ValueError("A given column is not a column of the dataframe") from e\nValueError: A given column is not a column of the dataframe\n').
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\optuna\study\_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\KANNAN\.vscode\doc-gpt\diabetes\src\models\tune.py", line 64, in objective
+    score = cross_val_score(pipeline, X_train, y_train, cv=5, scoring='roc_auc', n_jobs=-1).mean()
+            ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_param_validation.py", line 218, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_validation.py", line 677, in cross_val_score
+    cv_results = cross_validate(
+        estimator=estimator,
+    ...<9 lines>...
+        error_score=error_score,
+    )
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_param_validation.py", line 218, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_validation.py", line 419, in cross_validate
+    _warn_or_raise_about_fit_failures(results, error_score)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_validation.py", line 505, in _warn_or_raise_about_fit_failures
+    raise ValueError(all_fits_failed_message)
+ValueError: 
+All the 5 fits failed.
+It is very likely that your model is misconfigured.
+You can try to debug the error by setting error_score='raise'.
+
+Below are more details about the failures:
+--------------------------------------------------------------------------------
+5 fits failed with the following error:
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\core\indexes\base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'class'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_indexing.py", line 443, in _get_column_indices
+    col_idx = all_columns.get_loc(col)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\core\indexes\base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'class'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_validation.py", line 859, in _fit_and_score
+    estimator.fit(X_train, y_train, **fit_params)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 1365, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\pipeline.py", line 655, in fit
+    Xt = self._fit(X, y, routed_params, raw_params=params)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\pipeline.py", line 589, in _fit
+    X, fitted_transformer = fit_transform_one_cached(
+                            ~~~~~~~~~~~~~~~~~~~~~~~~^
+        cloned_transformer,
+        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        params=step_params,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\joblib\memory.py", line 326, in __call__
+    return self.func(*args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\pipeline.py", line 1540, in _fit_transform_one
+    res = transformer.fit_transform(X, y, **params.get("fit_transform", {}))
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 1365, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\compose\_column_transformer.py", line 988, in fit_transform
+    self._validate_column_callables(X)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\compose\_column_transformer.py", line 541, in _validate_column_callables
+    transformer_to_input_indices[name] = _get_column_indices(X, columns)
+                                         ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_indexing.py", line 451, in _get_column_indices
+    raise ValueError("A given column is not a column of the dataframe") from e
+ValueError: A given column is not a column of the dataframe
+
+2026-04-08 15:04:33,888 - optuna.study._optimize - WARNING - Trial 0 failed with value None.

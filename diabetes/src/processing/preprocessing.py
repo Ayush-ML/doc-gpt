@@ -10,7 +10,7 @@
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler, OrdinalEncoder, PowerTransformer, PolynomialFeatures, LabelEncoder
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder, PowerTransformer, PolynomialFeatures
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -30,7 +30,6 @@ def create_preprocessor(X: pd.DataFrame, y: pd.Series) -> ColumnTransformer: # T
 
     numerical = X.select_dtypes(include=['float64', 'int64']).columns
     categorical = X.select_dtypes(include=['object']).columns
-    target = y.name
 
     # Create Preprocessing Pipelines for Numerical and Categorical Columns
 
@@ -39,16 +38,12 @@ def create_preprocessor(X: pd.DataFrame, y: pd.Series) -> ColumnTransformer: # T
         ('feature_creation', PolynomialFeatures(interaction_only=True, include_bias=False)), # This is used to create interaction features between numerical features, which can help capture complex relationships in the data.
     ])
     categorical_pipeline = Pipeline(steps=[
-        ('encoder', OrdinalEncoder(handle_unknown='ignore', sparse_output=False)) # This is used to encode categorical features into a format that can be used by machine learning models.
-    ])
-    target_pipeline = Pipeline(steps=[
-        ('encoder', LabelEncoder()) # This is used to encode the target variable, which is necessary for classification models.
+        ('encoder', OrdinalEncoder()) # This is used to encode categorical features into a format that can be used by machine learning models.
     ])
 
     # Create and Return a ColumnTransformer that applies all pipelines to their appropriate columns
 
     return ColumnTransformer(transformers=[
         ('numerical', numerical_pipeline, numerical),
-        ('categorical', categorical_pipeline, categorical),
-        ('target', target_pipeline, target)
+        ('categorical', categorical_pipeline, categorical)
     ])
