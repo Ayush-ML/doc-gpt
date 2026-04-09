@@ -6,6 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import RFECV
 from sklearn.model_selection import StratifiedKFold
+from sklearn import set_config
 from diabetes.src.processing.preprocessing import create_preprocessor
 from xgboost import XGBClassifier
 import pandas as pd
@@ -34,4 +35,4 @@ def create_pipe() -> Pipeline:
         ('preprocessor', preprocessor),
         ('selector', selector),
         ('model', XGBClassifier())
-    ])
+    ]) 
