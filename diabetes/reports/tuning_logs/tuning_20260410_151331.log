@@ -1,0 +1,21 @@
+2026-04-10 15:13:31,179 - optuna.storages._in_memory - INFO - A new study created in memory with name: xgb_tuning
+2026-04-10 15:13:31,415 - optuna.study._optimize - WARNING - Trial 0 failed with parameters: {'max_depth': 5, 'min_child_weight': 3, 'gamma': 1.5, 'lambda': 1.5, 'alpha': 0.1, 'learning_rate': 0.06207090305742937, 'subsample': 0.7, 'colsample_bytree': 1.0, 'n_estimators': 220} because of the following error: InvalidParameterError("The 'estimator' parameter of cross_val_score must be an object implementing 'fit'. Got <xgboost.core.Booster object at 0x0000024BE3381550> instead.").
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\optuna\study\_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\KANNAN\.vscode\doc-gpt\diabetes\src\models\tune.py", line 94, in objective
+    cross_val = cross_val_score(bst, X_train, y_train, scoring=SCORING, cv=StratifiedKFold(n_splits=N_SPLITS)).mean()
+                ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_param_validation.py", line 208, in wrapper
+    validate_parameter_constraints(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        parameter_constraints, params, caller_name=func.__qualname__
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_param_validation.py", line 98, in validate_parameter_constraints
+    raise InvalidParameterError(
+    ...<2 lines>...
+    )
+sklearn.utils._param_validation.InvalidParameterError: The 'estimator' parameter of cross_val_score must be an object implementing 'fit'. Got <xgboost.core.Booster object at 0x0000024BE3381550> instead.
+2026-04-10 15:13:31,437 - optuna.study._optimize - WARNING - Trial 0 failed with value None.

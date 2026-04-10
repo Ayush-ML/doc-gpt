@@ -1,0 +1,27 @@
+2026-04-09 23:51:32,036 - optuna.storages._in_memory - INFO - A new study created in memory with name: xgb_tuning
+2026-04-09 23:51:32,073 - optuna.study._optimize - WARNING - Trial 0 failed with parameters: {'max_depth': 5, 'min_child_weight': 3, 'gamma': 1.5, 'lambda': 1.5, 'alpha': 0.1, 'learning_rate': 0.06207090305742937, 'subsample': 0.7, 'colsample_bytree': 1.0, 'n_estimators': 220} because of the following error: ValueError("feature_names mismatch: ['gender', ' age', ' urea               ', ' cr                ', ' hba1c', ' chol', ' tg                 ', ' hdl               ', ' ldl               ', ' vldl               ', ' bmi  ', ' chol_hdl_ratio', ' ldl_hdl_ratio', ' tg_hdl_ratio', ' non_hdl_chol', ' urea_cr_ratio', ' cr_elevated', ' egfr  ', ' Obese', ' metsyn_score', ' metsyn_flag', ' risk_score'] ['gender', 'age', 'urea', 'cr', 'hba1c', 'chol', 'tg', 'hdl', 'ldl', 'vldl', 'bmi', 'chol_hdl_ratio', 'ldl_hdl_ratio', 'tg_hdl_ratio', 'non_hdl_chol', 'urea_cr_ratio', 'cr_elevated', 'egfr', 'Obese', 'metsyn_score', 'metsyn_flag', 'risk_score']\nexpected  Obese,  urea_cr_ratio,  vldl               ,  tg_hdl_ratio,  risk_score,  urea               ,  non_hdl_chol,  ldl_hdl_ratio,  metsyn_flag,  hba1c,  metsyn_score,  hdl               ,  ldl               ,  age,  chol,  cr_elevated,  bmi  ,  egfr  ,  tg                 ,  chol_hdl_ratio,  cr                 in input data\ntraining data did not have the following fields: egfr, chol, metsyn_score, cr, risk_score, hba1c, age, chol_hdl_ratio, urea_cr_ratio, ldl, ldl_hdl_ratio, non_hdl_chol, Obese, vldl, hdl, tg_hdl_ratio, bmi, tg, urea, metsyn_flag, cr_elevated").
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\optuna\study\_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\KANNAN\.vscode\doc-gpt\diabetes\src\models\tune.py", line 81, in objective
+    bst = xgb.train(
+        param_grid,
+    ...<4 lines>...
+        verbose_eval=False
+    )
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\core.py", line 729, in inner_f
+    return func(**kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\training.py", line 166, in train
+    bst = Booster(params, [dtrain] + [d[0] for d in evals], model_file=xgb_model)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\core.py", line 1847, in __init__
+    self._assign_dmatrix_features(d)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\core.py", line 3208, in _assign_dmatrix_features
+    self._validate_features(fn)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\core.py", line 3243, in _validate_features
+    raise ValueError(msg.format(self.feature_names, feature_names))
+ValueError: feature_names mismatch: ['gender', ' age', ' urea               ', ' cr                ', ' hba1c', ' chol', ' tg                 ', ' hdl               ', ' ldl               ', ' vldl               ', ' bmi  ', ' chol_hdl_ratio', ' ldl_hdl_ratio', ' tg_hdl_ratio', ' non_hdl_chol', ' urea_cr_ratio', ' cr_elevated', ' egfr  ', ' Obese', ' metsyn_score', ' metsyn_flag', ' risk_score'] ['gender', 'age', 'urea', 'cr', 'hba1c', 'chol', 'tg', 'hdl', 'ldl', 'vldl', 'bmi', 'chol_hdl_ratio', 'ldl_hdl_ratio', 'tg_hdl_ratio', 'non_hdl_chol', 'urea_cr_ratio', 'cr_elevated', 'egfr', 'Obese', 'metsyn_score', 'metsyn_flag', 'risk_score']
+expected  Obese,  urea_cr_ratio,  vldl               ,  tg_hdl_ratio,  risk_score,  urea               ,  non_hdl_chol,  ldl_hdl_ratio,  metsyn_flag,  hba1c,  metsyn_score,  hdl               ,  ldl               ,  age,  chol,  cr_elevated,  bmi  ,  egfr  ,  tg                 ,  chol_hdl_ratio,  cr                 in input data
+training data did not have the following fields: egfr, chol, metsyn_score, cr, risk_score, hba1c, age, chol_hdl_ratio, urea_cr_ratio, ldl, ldl_hdl_ratio, non_hdl_chol, Obese, vldl, hdl, tg_hdl_ratio, bmi, tg, urea, metsyn_flag, cr_elevated
+2026-04-09 23:51:32,083 - optuna.study._optimize - WARNING - Trial 0 failed with value None.

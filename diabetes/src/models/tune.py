@@ -2,10 +2,8 @@
 # This is used to tune the hyperparameters of the model using Optuna's Bayesian Optimization
 # Import Libraraies
 
-from diabetes.src.models.build import create_pipe
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import roc_auc_score
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OrdinalEncoder
 from optuna import create_study, Trial
 from optuna.samplers import TPESampler
 from optuna.visualization import plot_parallel_coordinate, plot_param_importances, plot_slice, plot_optimization_history
@@ -18,20 +16,27 @@ import numpy as np
 import os
 import logging
 from datetime import datetime
+from sklearn.model_selection import StratifiedKFold
+from diabetes.config import X_VAL, X_TRAIN, Y_TRAIN, Y_VAL, LOGS, RANDOM_STATE, DIRECTION, HYPERPARAMS, TRIAL_DATA, TRIAL_HISTROY, TRIAL_PLOTS, TRIAL_SUMMARY, N_TRIALS, STUDY_NAME, METRIC_NAME, OBJECTIVE, NUM_CLASS, SCORING, N_SPLITS
 
 # Load Training Data
 
-X_train = pd.read_csv(r'diabetes\data\clean\train\X_train.csv')
-y_train = pd.read_csv(r'diabetes\data\clean\train\y_train.csv').squeeze()
-X_val = pd.read_csv(r'diabetes\data\clean\val\X_val.csv')
-y_val = pd.read_csv(r'diabetes\data\clean\val\y_val.csv').squeeze()
+X_train = pd.read_csv(X_TRAIN)
+y_train = pd.read_csv(Y_TRAIN).squeeze()
+X_val = pd.read_csv(X_VAL)
+y_val = pd.read_csv(Y_VAL).squeeze()
+
+X_train['gender'] = X_train['gender'].str.strip()
+X_val['gender'] = X_val['gender'].str.strip()
+X_train.columns = X_train.columns.str.strip()
+X_val.columns = X_val.columns.str.strip()
+
 
 # Setup Logging Directory
-logs_dir = r'diabetes\reports\tuning_logs'
 
 # Configure Logging
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-log_file = os.path.join(logs_dir, f'tuning_{timestamp}.log')
+log_file = os.path.join(LOGS, f'tuning_{timestamp}.log')
 
 logger = logging.getLogger('optuna')
 logger.setLevel(logging.INFO)
@@ -48,9 +53,9 @@ logger.addHandler(file_handler)
 def objective(trial: Trial) -> float:
     # Encode categorical columns (gender) to numeric before creating DMatrix
     
-    le = LabelEncoder()
-    X_train['gender'] = le.fit_transform(X_train['gender'])
-    X_val['gender'] = le.transform(X_val['gender'])
+    le = OrdinalEncoder(handle_unknown='error')
+    X_train['gender'] = le.fit_transform(X_train[['gender']])
+    X_val['gender'] = le.transform(X_val[['gender']])
 
     dtrain = DMatrix(X_train, label=y_train) # Create DMatrix for XGBoost, which is a more efficient data structure for training
     dval = DMatrix(X_val, label=y_val)
@@ -65,47 +70,41 @@ def objective(trial: Trial) -> float:
         'learning_rate': trial.suggest_float('learning_rate', 0.05, 0.2, log=True),
         'subsample': trial.suggest_float('subsample', 0.7, 1.0, step=0.1),
         'colsample_bytree': trial.suggest_float('colsample_bytree', 0.7, 1.0, step=0.1),
-        'objective': 'binary:logistic',  
-        'eval_metric': 'auc',  
-        'random_state': 42,
+        'objective': OBJECTIVE,  
+        'eval_metric': METRIC_NAME,  
+        'random_state': RANDOM_STATE,
+        'num_class': NUM_CLASS
     }
         
     # Setup pruning callback with correct metric name for binary
-    callback = XGBoostPruningCallback(trial, 'validation-auc')
+    callback = XGBoostPruningCallback(trial, f'validation-{METRIC_NAME}')
     
-    # Train XGBoost model
-    num_round = trial.suggest_int('n_estimators', 100, 300)
-    bst = xgb.train(
-        param_grid, 
-        dtrain, 
-        num_boost_round=num_round,
-        evals=[(dval, 'validation')], 
-        callbacks=[callback],
-        verbose_eval=False
-    )
+    # Build XGBoost model
+
+    model = xgb.XGBClassifier(**param_grid)
     
-    # Get predictions and calculate AUC 
-    y_pred = bst.predict(dval)  # Returns probabilities [0, 1]
-    auc_score = roc_auc_score(y_val, y_pred)
-    return auc_score
+    # Calculate Cross Validation Score
+    cross_val = cross_val_score(model, X_train, y_train, scoring=SCORING, cv=StratifiedKFold(n_splits=N_SPLITS)).mean()
+    return cross_val
 
 if __name__ == "__main__":
-    study = create_study(direction='maximize', sampler=TPESampler(seed=42), study_name='xgb_tuning') # Create Optuna Study
+    sampler = TPESampler(seed=RANDOM_STATE)
+
+    study = create_study(direction=DIRECTION, sampler=sampler, study_name=STUDY_NAME) # Create Optuna Study
     study.optimize(
         objective,
-        n_trials=50,
+        n_trials=N_TRIALS,
         show_progress_bar=True,
         gc_after_trial=True
     )
         
     # Save Best Hyperparameters
-    with open(r"diabetes\models\tuned_hyperparams.json", 'w') as f:
+    with open(HYPERPARAMS, 'w') as f:
         json.dump(study.best_params, f, indent=4)
     
     # Save All Trials History as CSV
-    csv_path = r"diabetes\reports\tuning_logs\trial_history"
     trials_df = study.trials_dataframe()
-    trials_df.to_csv(csv_path, index=False)
+    trials_df.to_csv(TRIAL_HISTROY, index=False)
     
     # Save All Trials as JSON
     trials_data = {
@@ -119,11 +118,11 @@ if __name__ == "__main__":
             for trial in study.trials
         ]
     }
-    with open(r"diabetes\reports\tuning_logs\trial_data.json", 'w') as f:
+    with open(TRIAL_DATA, 'w') as f:
         json.dump(trials_data, f, indent=4)
     
     # Save Study Summary
-    with open(r"diabetes\reports\tuning_logs\trial_summary.txt", 'w') as f:
+    with open(TRIAL_SUMMARY, 'w') as f:
         f.write(f"Optuna Tuning Study Summary\n")
         f.write(f"===========================\n\n")
         f.write(f"Study Name: {study.study_name}\n")
@@ -141,16 +140,16 @@ if __name__ == "__main__":
 
     # Optimization progress over trials
     fig1 = plot_optimization_history(study)
-    fig1.write_html(r"diabetes\reports\tuning_logs\optimization_history.html")
+    fig1.write_html(f"{TRIAL_PLOTS}\optimization_history.html")
 
     # Which hyperparameters matter most?
     fig2 = plot_param_importances(study)
-    fig2.write_html(r"diabetes\reports\tuning_logs\param_importances.html")
+    fig2.write_html(f"{TRIAL_PLOTS}\param_importances.html")
 
     # Relationship between each param and objective
     fig3 = plot_slice(study)
-    fig3.write_html(r"diabetes\reports\tuning_logs\param_obj_relation.html")
+    fig3.write_html(f"{TRIAL_PLOTS}\param_obj_relation.html")
 
     # High-dimensional parameter relationships
     fig4 = plot_parallel_coordinate(study)
-    fig4.write_html(r"diabetes\reports\tuning_logs\high_dim_param_relations.html")
+    fig4.write_html(f"{TRIAL_PLOTS}\high_dim_param_relations.html")

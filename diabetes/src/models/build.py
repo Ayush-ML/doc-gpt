@@ -10,11 +10,12 @@ from sklearn import set_config
 from diabetes.src.processing.preprocessing import create_preprocessor
 from xgboost import XGBClassifier
 import pandas as pd
+from diabetes.config import X_TRAIN, Y_TRAIN, RFECV_STEP, RFECV_MIN_FEATURES, RANDOM_STATE, SHUFFLE, MAX_ITER, C, CLASS_WEIGHT, N_SPLITS, SCORING
 
 # Load Train Data
 
-X_train = pd.read_csv(r'diabetes\data\clean\train\X_train.csv')
-y_train = pd.read_csv(r'diabetes\data\clean\train\y_train.csv').squeeze() 
+X_train = pd.read_csv(X_TRAIN)
+y_train = pd.read_csv(Y_TRAIN).squeeze() 
 
 # Create Preprocessor
 
@@ -22,11 +23,14 @@ preprocessor = create_preprocessor(X=X_train, y=y_train)
 
 # Create the Selector used for Feature Selection
 
-selector = RFECV(estimator=LogisticRegression(max_iter=1000, C=0.1, class_weight='balanced', random_state=42),
-                step=1,
-                cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
-                scoring='roc_auc',
-                min_features_to_select=7)
+estimator = LogisticRegression(max_iter=MAX_ITER, C=C, class_weight=CLASS_WEIGHT, random_state=RANDOM_STATE)
+cv = StratifiedKFold(n_splits=N_SPLITS, shuffle=SHUFFLE, random_state=RANDOM_STATE)
+
+selector = RFECV(estimator=estimator,
+                step=RFECV_STEP,
+                cv=cv,
+                scoring=SCORING,
+                min_features_to_select=RFECV_MIN_FEATURES)
 
 # Create the Pipeline that combines the Preprocessor, Selector and the Model
 

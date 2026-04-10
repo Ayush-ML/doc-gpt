@@ -1,0 +1,51 @@
+2026-04-09 23:53:03,788 - optuna.storages._in_memory - INFO - A new study created in memory with name: xgb_tuning
+2026-04-09 23:53:04,113 - optuna.study.study - INFO - Trial 0 finished with value: 0.9984313725490196 and parameters: {'max_depth': 5, 'min_child_weight': 3, 'gamma': 1.5, 'lambda': 1.5, 'alpha': 0.1, 'learning_rate': 0.06207090305742937, 'subsample': 0.7, 'colsample_bytree': 1.0, 'n_estimators': 220}. Best is trial 0 with value: 0.9984313725490196.
+2026-04-09 23:53:04,420 - optuna.study.study - INFO - Trial 1 finished with value: 0.9992156862745099 and parameters: {'max_depth': 7, 'min_child_weight': 1, 'gamma': 2.0, 'lambda': 2.0, 'alpha': 0.2, 'learning_rate': 0.06433385005697079, 'subsample': 0.7, 'colsample_bytree': 0.7999999999999999, 'n_estimators': 205}. Best is trial 1 with value: 0.9992156862745099.
+2026-04-09 23:53:04,686 - optuna.study.study - INFO - Trial 2 finished with value: 0.9992156862745099 and parameters: {'max_depth': 6, 'min_child_weight': 1, 'gamma': 1.5, 'lambda': 0.5, 'alpha': 0.30000000000000004, 'learning_rate': 0.08308867100591956, 'subsample': 0.7999999999999999, 'colsample_bytree': 1.0, 'n_estimators': 140}. Best is trial 1 with value: 0.9992156862745099.
+2026-04-09 23:53:05,115 - optuna.study.study - INFO - Trial 3 finished with value: 0.9992156862745099 and parameters: {'max_depth': 6, 'min_child_weight': 2, 'gamma': 0.0, 'lambda': 1.5, 'alpha': 0.1, 'learning_rate': 0.054718598564940636, 'subsample': 1.0, 'colsample_bytree': 1.0, 'n_estimators': 262}. Best is trial 1 with value: 0.9992156862745099.
+2026-04-09 23:53:05,335 - optuna.study.study - INFO - Trial 4 finished with value: 0.9992156862745099 and parameters: {'max_depth': 5, 'min_child_weight': 1, 'gamma': 1.5, 'lambda': 1.0, 'alpha': 0.1, 'learning_rate': 0.09933360807331099, 'subsample': 0.7, 'colsample_bytree': 1.0, 'n_estimators': 152}. Best is trial 1 with value: 0.9992156862745099.
+2026-04-09 23:53:05,786 - optuna.study.study - INFO - Trial 5 finished with value: 0.9992156862745099 and parameters: {'max_depth': 7, 'min_child_weight': 1, 'gamma': 1.0, 'lambda': 1.5, 'alpha': 0.2, 'learning_rate': 0.1917423814021637, 'subsample': 1.0, 'colsample_bytree': 1.0, 'n_estimators': 279}. Best is trial 1 with value: 0.9992156862745099.
+2026-04-09 23:53:05,889 - optuna.study._optimize - INFO - Trial 6 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:05,996 - optuna.study._optimize - INFO - Trial 7 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:06,150 - optuna.study._optimize - INFO - Trial 8 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:06,268 - optuna.study._optimize - INFO - Trial 9 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:06,406 - optuna.study._optimize - INFO - Trial 10 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:06,533 - optuna.study._optimize - INFO - Trial 11 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:06,661 - optuna.study._optimize - INFO - Trial 12 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:06,791 - optuna.study._optimize - INFO - Trial 13 pruned. Trial was pruned at iteration 3.
+2026-04-09 23:53:06,917 - optuna.study._optimize - INFO - Trial 14 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:07,044 - optuna.study._optimize - INFO - Trial 15 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:07,344 - optuna.study.study - INFO - Trial 16 finished with value: 1.0 and parameters: {'max_depth': 4, 'min_child_weight': 1, 'gamma': 1.5, 'lambda': 0.5, 'alpha': 0.30000000000000004, 'learning_rate': 0.1283488148975367, 'subsample': 0.7, 'colsample_bytree': 0.7999999999999999, 'n_estimators': 172}. Best is trial 16 with value: 1.0.
+2026-04-09 23:53:07,643 - optuna.study.study - INFO - Trial 17 finished with value: 0.9984313725490196 and parameters: {'max_depth': 4, 'min_child_weight': 1, 'gamma': 1.0, 'lambda': 2.0, 'alpha': 0.0, 'learning_rate': 0.12884326320648345, 'subsample': 0.7, 'colsample_bytree': 0.7999999999999999, 'n_estimators': 171}. Best is trial 16 with value: 1.0.
+2026-04-09 23:53:07,771 - optuna.study._optimize - INFO - Trial 18 pruned. Trial was pruned at iteration 3.
+2026-04-09 23:53:07,899 - optuna.study._optimize - INFO - Trial 19 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:08,026 - optuna.study._optimize - INFO - Trial 20 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:08,153 - optuna.study._optimize - INFO - Trial 21 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:08,282 - optuna.study._optimize - INFO - Trial 22 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:08,410 - optuna.study._optimize - INFO - Trial 23 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:08,540 - optuna.study._optimize - INFO - Trial 24 pruned. Trial was pruned at iteration 2.
+2026-04-09 23:53:08,668 - optuna.study._optimize - INFO - Trial 25 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:08,803 - optuna.study._optimize - INFO - Trial 26 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:08,947 - optuna.study._optimize - INFO - Trial 27 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:09,091 - optuna.study._optimize - INFO - Trial 28 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:09,240 - optuna.study._optimize - INFO - Trial 29 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:09,404 - optuna.study._optimize - INFO - Trial 30 pruned. Trial was pruned at iteration 2.
+2026-04-09 23:53:09,552 - optuna.study._optimize - INFO - Trial 31 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:09,710 - optuna.study._optimize - INFO - Trial 32 pruned. Trial was pruned at iteration 4.
+2026-04-09 23:53:09,856 - optuna.study._optimize - INFO - Trial 33 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:09,999 - optuna.study._optimize - INFO - Trial 34 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:10,139 - optuna.study._optimize - INFO - Trial 35 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:10,279 - optuna.study._optimize - INFO - Trial 36 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:10,415 - optuna.study._optimize - INFO - Trial 37 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:10,553 - optuna.study._optimize - INFO - Trial 38 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:10,702 - optuna.study._optimize - INFO - Trial 39 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:10,872 - optuna.study._optimize - INFO - Trial 40 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:11,029 - optuna.study._optimize - INFO - Trial 41 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:11,165 - optuna.study._optimize - INFO - Trial 42 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:11,295 - optuna.study._optimize - INFO - Trial 43 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:11,433 - optuna.study._optimize - INFO - Trial 44 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:11,572 - optuna.study._optimize - INFO - Trial 45 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:11,710 - optuna.study._optimize - INFO - Trial 46 pruned. Trial was pruned at iteration 2.
+2026-04-09 23:53:11,838 - optuna.study._optimize - INFO - Trial 47 pruned. Trial was pruned at iteration 1.
+2026-04-09 23:53:11,973 - optuna.study._optimize - INFO - Trial 48 pruned. Trial was pruned at iteration 0.
+2026-04-09 23:53:12,111 - optuna.study._optimize - INFO - Trial 49 pruned. Trial was pruned at iteration 2.

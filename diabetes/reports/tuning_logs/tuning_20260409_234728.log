@@ -1,0 +1,24 @@
+2026-04-09 23:47:28,694 - optuna.storages._in_memory - INFO - A new study created in memory with name: xgb_tuning
+2026-04-09 23:47:28,702 - optuna.study._optimize - WARNING - Trial 0 failed with parameters: {} because of the following error: ValueError("Found unknown categories ['f', 'm'] in column 0 during transform").
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\optuna\study\_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\KANNAN\.vscode\doc-gpt\diabetes\src\models\tune.py", line 53, in objective
+    X_val['gender'] = le.transform(X_val[['gender']])
+                      ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\preprocessing\_encoders.py", line 1597, in transform
+    X_int, X_mask = self._transform(
+                    ~~~~~~~~~~~~~~~^
+        X,
+        ^^
+    ...<2 lines>...
+        ignore_category_indices=self._missing_indices,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\preprocessing\_encoders.py", line 218, in _transform
+    raise ValueError(msg)
+ValueError: Found unknown categories ['f', 'm'] in column 0 during transform
+2026-04-09 23:47:28,710 - optuna.study._optimize - WARNING - Trial 0 failed with value None.

@@ -6,26 +6,25 @@
 
 import pandas as pd
 from diabetes.src.models.build import create_pipe
-from sklearn.model_selection import cross_validate
-from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, matthews_corrcoef, average_precision_score, RocCurveDisplay, PrecisionRecallDisplay, ConfusionMatrixDisplay
-from sklearn.calibration import CalibrationDisplay
-import json, mlflow, os
-from sklearn import set_config
-from xgboost.callback import EarlyStopping
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, matthews_corrcoef, average_precision_score, cohen_kappa_score, log_loss, balanced_accuracy_score
+from sklearn.calibration import CalibrationDisplay, CalibratedClassifierCV
+import json, mlflow
+from diabetes.config import X_TEST, X_TRAIN, X_VAL, Y_TEST, Y_TRAIN, Y_VAL, HYPERPARAMS, EXPERIEMENT, METRICS, MODEL, TRACKING, ROUNDS, METRIC_NAME, N_SPLITS, AVERAGE, CALIBRATION
+from sklearn.preprocessing import label_binarize
+import matplotlib.pyplot as plt
 
 # Load Train, Test and Validation Data
 
-X_train = pd.read_csv(r'diabetes\data\clean\train\X_train.csv')
-y_train = pd.read_csv(r'diabetes\data\clean\train\y_train.csv').squeeze()
-X_test = pd.read_csv(r'diabetes\data\clean\test\X_test.csv')
-y_test = pd.read_csv(r'diabetes\data\clean\test\y_test.csv').squeeze()
-X_val = pd.read_csv(r'diabetes\data\clean\val\X_val.csv')
-y_val = pd.read_csv(r'diabetes\data\clean\val\y_val.csv').squeeze()
+X_train = pd.read_csv(X_TRAIN)
+y_train = pd.read_csv(Y_TRAIN).squeeze()
+X_test = pd.read_csv(X_TEST)
+y_test = pd.read_csv(Y_TEST).squeeze()
+X_val = pd.read_csv(X_VAL)
+y_val = pd.read_csv(Y_VAL).squeeze()
 
+mlflow.set_tracking_uri(TRACKING)
 mlflow.sklearn.autolog() # Enable MLflow Autologging for scikit-learn, which automatically logs parameters, metrics, and models during training.
-set_config(enable_metadata_routing=True) # Enable Metadata Routing , which helps to customize your models params further
-mlflow.set_tracking_uri(r"sqlite:///diabetes/reports/training_logs/mlflow.db")
-mlflow.set_experiment("model_training") # Set an Experiment before starting run to prevent issues
 
 # Load Model Pipeline
 
@@ -33,59 +32,69 @@ pipeline = create_pipe()
 
 # Load Tuned Hyperparameters
 
-with open(r"diabetes\models\tuned_hyperparams.json", 'r') as f:
+with open(HYPERPARAMS, 'r') as f:
     best_params = json.load(f)
-
-# Define my XGBoost Callbacks
-# Here we will use Early Stopping to stop training when the model stops improving on the validation set
-
-earlystopping = EarlyStopping(rounds=50, metric_name='auc', data_name='validation_0', save_best=True) # This will monitor the AUC metric on the validation set and stop training if it doesn't improve for 50 rounds, also it will save the best model during training
 
 # Set the Best Hyperparameters to the Model
 
 pipeline.named_steps['model'].set_params(**best_params)
-pipeline.named_steps['model'].set_params(callbacks=[earlystopping]) # Enable Callbacks in the model, which is necessary for Optimal and Efficent Training
-pipeline.named_steps['model'].set_fit_request(eval_set=True) # Enable eval_set in the model, which is important for the model to not guess one class and get good metrics with learning anything
 
-X_val_transformed = pipeline[:-1].fit_transform(X_train, y_train) # Fit the Preprocessor and Selector on the training data and transform the validation data
-X_val = pipeline[:-1].transform(X_val)                 # Transform the validation data with the fitted preprocessor and selector, this is necessary to get the correct feature selection and transformation for the validation set 
+# Wrap Claibrated Classifier around the Pipeline to imporve Calibration
 
-with mlflow.start_run(run_name="model_training"):
-    pipeline.fit(X_train, y_train, eval_set=[(X_val, y_val)]) # Fit the model on the training data with eval set and calls backs
-    mlflow.sklearn.save_model(sk_model=pipeline, path=r"diabetes\models\final_model") # Save the final model as an artifact in MLflow
+pipeline = CalibratedClassifierCV(estimator=pipeline, method='sigmoid', cv=StratifiedKFold(n_splits=N_SPLITS))
+
+with mlflow.start_run(run_name=EXPERIEMENT):
+    pipeline.fit(X_train, y_train) # Fit the model on the training data with eval set and calls backs
+    mlflow.sklearn.save_model(sk_model=pipeline, path=MODEL) # Save the final model as an artifact in MLflow
 
 y_pred = pipeline.predict(X_test) # Predict on the test set
-y_proba = pipeline.predict_proba(X_test)[:, 1] # Get the predicted probabilities for the positive class
+y_proba = pipeline.predict_proba(X_test) # Get the predicted probabilities 
 
 # Calculate Metrics
 
 accuracy = accuracy_score(y_test, y_pred)
-precision = precision_score(y_test, y_pred)
-recall = recall_score(y_test, y_pred)
-f1 = f1_score(y_test, y_pred)
+balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
+
+precision = precision_score(y_test, y_pred, average=AVERAGE)
+recall = recall_score(y_test, y_pred, average=AVERAGE)
+f1 = f1_score(y_test, y_pred, average=AVERAGE)
+macro_f1 = f1_score(y_test, y_pred, average='macro')
+
+kappa = cohen_kappa_score(y_test, y_pred)
 mcc = matthews_corrcoef(y_test, y_pred)
-roc_auc = roc_auc_score(y_test, y_proba)
-avg_precision = average_precision_score(y_test, y_proba)
-classification_report = classification_report(y_test, y_pred)
+roc_auc = roc_auc_score(y_test, y_proba, multi_class='ovr', average=AVERAGE)
+log_loss = log_loss(y_test, y_proba)
+
+avg_precision = average_precision_score(y_test, y_proba, average=AVERAGE)
+classification_report = classification_report(y_test, y_pred, target_names=['N', 'P', 'Y'])
 conf_matrix = confusion_matrix(y_test, y_pred)
 
 # Create and Save Plots
 
-roc = RocCurveDisplay.from_estimator(pipeline, X_test, y_test)
-mlflow.log_figure(roc.figure_, "garphed_metrics/roc_curve.png") # Log the ROC curve as an artifact in MLflow
+classes = [0, 1, 2]
+class_names = ['N', 'P', 'Y']
+y_test_bin = label_binarize(y_test, classes=classes) # Binarize Y_test
 
-conf = ConfusionMatrixDisplay.from_estimator(pipeline, X_test, y_test, cmap='Blues')
-mlflow.log_figure(conf.figure_, "garphed_metrics/confusion_matrix.png") # Log the confusion matrix as an artifact in MLflow
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-cal = CalibrationDisplay.from_estimator(pipeline, X_test, y_test, n_bins=10)
-mlflow.log_figure(cal.figure_, "garphed_metrics/calibration_curve.png") # Log the calibration curve as an artifact in MLflow
+for i, (class_name, ax) in enumerate(zip(class_names, axes)):
+    CalibrationDisplay.from_predictions(
+        y_test_bin[:, i],   # true binary labels for this class
+        y_proba[:, i],      # predicted probabilities for this class
+        n_bins=10,
+        name=f'Class {class_name}',
+        ax=ax
+    )
+    ax.set_title(f'Calibration — Class {class_name}')
 
-per = PrecisionRecallDisplay.from_estimator(pipeline, X_test, y_test)
-mlflow.log_figure(per.figure_, "garphed_metrics/precision_recall_curve.png") # Log the precision-recall curve as an artifact in MLflow
+plt.suptitle('Calibration Curves (One-vs-Rest)', fontsize=14)
+plt.tight_layout()
+
+mlflow.log_figure(fig, CALIBRATION)
 
 # Save Metrics to a txt file
 
-with open(r"diabetes\reports\training_logs\metrics.txt", 'w') as f:
+with open(METRICS, 'w') as f:
     f.write(f"Final Model Performance Metrics on Test Set\n")
     f.write(f"=========================================\n\n")
     f.write(f"Accuracy: {accuracy}\n")
@@ -93,6 +102,10 @@ with open(r"diabetes\reports\training_logs\metrics.txt", 'w') as f:
     f.write(f"Recall: {recall}\n")
     f.write(f"F1 Score: {f1}\n")
     f.write(f"MCC: {mcc}\n")
+    f.write(f"Log Loss: {log_loss}\n")
+    f.write(f"Cohen Kappa: {kappa}\n")
+    f.write(f"Balanced accuracy: {balanced_accuracy}\n")
+    f.write(f"Macro F1: {macro_f1}\n")
     f.write(f"ROC AUC: {roc_auc}\n")
     f.write(f"Average Precision: {avg_precision}\n\n")
     f.write("Classification Report:\n")
@@ -100,4 +113,4 @@ with open(r"diabetes\reports\training_logs\metrics.txt", 'w') as f:
     f.write("\nConfusion Matrix:\n")
     f.write(str(conf_matrix))
 
-mlflow.log_artifact(r"diabetes\reports\training_logs\metrics.txt") # Log the metrics file as an artifact in MLflow
+mlflow.log_artifact(METRICS) # Log the metrics file as an artifact in MLflow

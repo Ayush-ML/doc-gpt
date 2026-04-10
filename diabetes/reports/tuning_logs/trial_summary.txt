@@ -5,18 +5,17 @@ Study Name: xgb_tuning
 Direction: maximize
 Metric: ROC-AUC (binary classification)
 Total Trials: 50
-Best Trial Number: 2
-Best AUC Score: 0.999216
+Best Trial Number: 44
+Best AUC Score: 0.960712
 
 Best Hyperparameters:
-  max_depth: 6
+  max_depth: 7
   min_child_weight: 1
-  gamma: 1.5
+  gamma: 0.0
   lambda: 0.5
-  alpha: 0.30000000000000004
-  learning_rate: 0.08308867100591956
-  subsample: 0.7999999999999999
-  colsample_bytree: 1.0
-  n_estimators: 140
+  alpha: 0.6000000000000001
+  learning_rate: 0.09659529798664028
+  subsample: 1.0
+  colsample_bytree: 0.7
 
-Timestamp: 20260408_161248
+Timestamp: 20260410_151545

@@ -14,14 +14,16 @@ from sklearn.preprocessing import StandardScaler, OrdinalEncoder, PowerTransform
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
+from diabetes.config import (X_TRAIN, Y_TRAIN, X_TEST, Y_TEST,
+                             TRANSFORMER_METHOD, FEATURE_CREATION_INTERACTION, FEATURE_CREATION_BIAS)
 
 # Load The Cleaned data that is split into train an test
 
-X_test = pd.read_csv(r'diabetes\data\clean\test\X_test.csv')
-y_test = pd.read_csv(r'diabetes\data\clean\test\y_test.csv').squeeze() # Squeeze is necessary to Cinvert a Dataframe to a Series, which is the expected format for y in scikit-learn models.
+X_test = pd.read_csv(X_TEST)
+y_test = pd.read_csv(Y_TEST).squeeze() # Squeeze is necessary to Cinvert a Dataframe to a Series, which is the expected format for y in scikit-learn models.
 
-X_train = pd.read_csv(r'diabetes\data\clean\train\X_train.csv')
-y_train = pd.read_csv(r'diabetes\data\clean\train\y_train.csv').squeeze()
+X_train = pd.read_csv(X_TRAIN)
+y_train = pd.read_csv(Y_TRAIN).squeeze()
 
 def create_preprocessor(X: pd.DataFrame, y: pd.Series) -> ColumnTransformer: # This function is used to create a Preprocessor that can be used in a Pipeline with the model.
     # It returns a ColumnTransformer that applies the appropriate transformations to numerical and categorical features.
@@ -34,8 +36,8 @@ def create_preprocessor(X: pd.DataFrame, y: pd.Series) -> ColumnTransformer: # T
     # Create Preprocessing Pipelines for Numerical and Categorical Columns
 
     numerical_pipeline = Pipeline(steps=[
-        ('transformer', PowerTransformer(method='yeo-johnson', standardize=True)), # This is used to make the distribution of numerical features more normal
-        ('feature_creation', PolynomialFeatures(interaction_only=True, include_bias=False)), # This is used to create interaction features between numerical features, which can help capture complex relationships in the data.
+        ('transformer', PowerTransformer(method=TRANSFORMER_METHOD)), # This is used to make the distribution of numerical features more normal
+        ('feature_creation', PolynomialFeatures(interaction_only=FEATURE_CREATION_INTERACTION, include_bias=FEATURE_CREATION_BIAS)), # This is used to create interaction features between numerical features, which can help capture complex relationships in the data.
     ])
     categorical_pipeline = Pipeline(steps=[
         ('encoder', OrdinalEncoder()) # This is used to encode categorical features into a format that can be used by machine learning models.
