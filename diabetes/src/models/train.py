@@ -5,6 +5,7 @@
 # Imported Libraries
 
 import pandas as pd
+import numpy as np
 from diabetes.src.models.build import create_pipe
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, matthews_corrcoef, average_precision_score, cohen_kappa_score, log_loss, balanced_accuracy_score
@@ -13,6 +14,8 @@ import json, mlflow
 from diabetes.config import X_TEST, X_TRAIN, X_VAL, Y_TEST, Y_TRAIN, Y_VAL, HYPERPARAMS, EXPERIEMENT, METRICS, MODEL, TRACKING, ROUNDS, METRIC_NAME, N_SPLITS, AVERAGE, CALIBRATION
 from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
+from sklearn.utils.class_weight import compute_sample_weight
+import numpy as np
 
 # Load Train, Test and Validation Data
 
@@ -20,8 +23,6 @@ X_train = pd.read_csv(X_TRAIN)
 y_train = pd.read_csv(Y_TRAIN).squeeze()
 X_test = pd.read_csv(X_TEST)
 y_test = pd.read_csv(Y_TEST).squeeze()
-X_val = pd.read_csv(X_VAL)
-y_val = pd.read_csv(Y_VAL).squeeze()
 
 mlflow.set_tracking_uri(TRACKING)
 mlflow.sklearn.autolog() # Enable MLflow Autologging for scikit-learn, which automatically logs parameters, metrics, and models during training.

@@ -1,30 +1,30 @@
 Final Model Performance Metrics on Test Set
 =========================================
 
-Accuracy: 0.94
-Precision: 0.949463327370304
-Recall: 0.94
-F1 Score: 0.9300152555301296
-MCC: 0.7697745310403012
-Log Loss: 0.2533481552452138
-Cohen Kappa: 0.7651663405088063
-Balanced accuracy: 0.6960784313725491
-Macro F1: 0.6994660564454614
-ROC AUC: 0.9437777777777776
-Average Precision: 0.9347083918776332
+Accuracy: 0.93
+Precision: 0.9373563218390806
+Recall: 0.93
+F1 Score: 0.9196264975334743
+MCC: 0.7232008906378296
+Log Loss: 0.24967174417879842
+Cohen Kappa: 0.717741935483871
+Balanced accuracy: 0.6627450980392157
+Macro F1: 0.6791167488841907
+ROC AUC: 0.9517192982456141
+Average Precision: 0.931197367013415
 
 Classification Report:
               precision    recall  f1-score   support
 
-           N       0.69      0.90      0.78        10
+           N       0.67      0.80      0.73        10
            P       1.00      0.20      0.33         5
-           Y       0.98      0.99      0.98        85
+           Y       0.97      0.99      0.98        85
 
-    accuracy                           0.94       100
-   macro avg       0.89      0.70      0.70       100
-weighted avg       0.95      0.94      0.93       100
+    accuracy                           0.93       100
+   macro avg       0.88      0.66      0.68       100
+weighted avg       0.94      0.93      0.92       100
 
 Confusion Matrix:
-[[ 9  0  1]
+[[ 8  0  2]
  [ 3  1  1]
  [ 1  0 84]]

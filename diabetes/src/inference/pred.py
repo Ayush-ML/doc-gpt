@@ -10,18 +10,31 @@ from diabetes.config import MODEL
 
 pipeline = mlflow.sklearn.load_model(MODEL)
 
-def predict_diabetes(input_data: dict) -> dict:
+def predict_diabetes(input_data: dict, threshold: float=0.3) -> dict:
     # Convert input data to a pandas DataFrame
     df = pd.DataFrame([input_data])
     
     # Engineer features
     df = engineer_features(df)
     
-    # Make prediction
-    prediction = pipeline.predict(df)
-    probability = pipeline.predict_proba(df)[:, 1]
+    # Make prediction using Custom Class 1 Threshold
+    probability = pipeline.predict_proba(df)[0]
+    if probability[1] > threshold:
+        prediction = 1
+    else:
+        int(np.argmax(probability))
+    label_map = {
+        0: 'Non-Diabetic',
+        1: 'Pre-Diabetic',
+        2: 'Diabetic'
+    }
     
     return {
-        "prediction": "Diabetic" if prediction[0] == 1 else "Non-Diabetic",
-        "confidence": float(probability[0])
+        "prediction": label_map[prediction],
+        "confidence": float(np.argmax(probability)),
+        'all_probabilities': {
+            'Non-Diabetic': float(probability[0]),
+            'Pre-Diabetic': float(probability[1]),
+            'Diabetic': float(probability[2])
+        }
     }
