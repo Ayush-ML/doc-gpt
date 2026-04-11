@@ -11,6 +11,7 @@ from diabetes.config import MODEL
 pipeline = mlflow.sklearn.load_model(MODEL)
 
 def predict_diabetes(input_data: dict, threshold: float=0.3) -> dict:
+    """"""
     # Convert input data to a pandas DataFrame
     df = pd.DataFrame([input_data])
     
@@ -22,7 +23,7 @@ def predict_diabetes(input_data: dict, threshold: float=0.3) -> dict:
     if probability[1] > threshold:
         prediction = 1
     else:
-        int(np.argmax(probability))
+        prediction = int(np.argmax(probability))
     label_map = {
         0: 'Non-Diabetic',
         1: 'Pre-Diabetic',
@@ -31,10 +32,10 @@ def predict_diabetes(input_data: dict, threshold: float=0.3) -> dict:
     
     return {
         "prediction": label_map[prediction],
-        "confidence": float(np.argmax(probability)),
-        'all_probabilities': {
-            'Non-Diabetic': float(probability[0]),
-            'Pre-Diabetic': float(probability[1]),
-            'Diabetic': float(probability[2])
+        "confidence of predicted class(in percentage)": float((probability[prediction] * 100).round(3)),
+        'all probabilities for classes': {
+            'Non-Diabetic': float((probability[0] * 100).round(3)),
+            'Pre-Diabetic': float((probability[1] * 100).round(3)),
+            'Diabetic': float((probability[2] * 100).round(3))
         }
     }

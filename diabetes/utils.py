@@ -38,7 +38,7 @@ def engineer_features(df):
     0.25 * minmax(df['age'])   +
     0.20 * minmax(df['tg'])    +
     0.20 * minmax(df['chol'])
-    ).round(4)
+    )
 
     df['metsyn_score'] = ( # Metabolic Syndrome is a cluster of conditions that combine multiple signals into one score
     (df['bmi']   >= 30.0).astype(int) +
