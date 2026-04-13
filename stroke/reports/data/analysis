@@ -1,0 +1,135 @@
+ id   gender   age  hypertension  heart_disease   ever_married       work_type   Residence_type  avg_glucose_level   bmi    smoking_status  stroke
+0   9046   Male    67.0             0              1   Yes            Private         Urban                      228.69  36.6   formerly smoked       1
+1  51676   Female  61.0             0              0   Yes            Self-employed   Rural                      202.21   NaN   never smoked          1
+2  31112   Male    80.0             0              1   Yes            Private         Rural                      105.92  32.5   never smoked          1
+3  60182   Female  49.0             0              0   Yes            Private         Urban                      171.23  34.4   smokes                1
+4   1665   Female  79.0             1              0   Yes            Self-employed   Rural                      174.12  24.0   never smoked          1
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 5110 entries, 0 to 5109
+Data columns (total 12 columns):
+ #   Column             Non-Null Count  Dtype  
+---  ------             --------------  -----  
+ 0   id                 5110 non-null   int64  
+ 1   gender             5110 non-null   object 
+ 2   age                5110 non-null   float64
+ 3   hypertension       5110 non-null   int64  
+ 4   heart_disease      5110 non-null   int64  
+ 5   ever_married       5110 non-null   object 
+ 6   work_type          5110 non-null   object 
+ 7   Residence_type     5110 non-null   object 
+ 8   avg_glucose_level  5110 non-null   float64
+ 9   bmi                4909 non-null   float64
+ 10  smoking_status     5110 non-null   object 
+ 11  stroke             5110 non-null   int64  
+dtypes: float64(3), int64(4), object(5)
+memory usage: 479.2+ KB
+None
+                  id   gender          age  hypertension  heart_disease   ever_married       work_type   Residence_type  avg_glucose_level          bmi    smoking_status       stroke
+count    5110.000000     5110  5110.000000   5110.000000    5110.000000           5110            5110             5110        5110.000000  4909.000000              5110  5110.000000
+unique           NaN        3          NaN           NaN            NaN              2               5                2                NaN          NaN                 4          NaN
+top              NaN   Female          NaN           NaN            NaN   Yes            Private         Urban                         NaN          NaN   never smoked             NaN
+freq             NaN     2994          NaN           NaN            NaN           3353            2925             2596                NaN          NaN              1892          NaN
+mean    36517.829354      NaN    43.226614      0.097456       0.054012            NaN             NaN              NaN         106.147677    28.893237               NaN     0.048728
+std     21161.721625      NaN    22.612647      0.296607       0.226063            NaN             NaN              NaN          45.283560     7.854067               NaN     0.215320
+min        67.000000      NaN     0.080000      0.000000       0.000000            NaN             NaN              NaN          55.120000    10.300000               NaN     0.000000
+25%     17741.250000      NaN    25.000000      0.000000       0.000000            NaN             NaN              NaN          77.245000    23.500000               NaN     0.000000
+50%     36932.000000      NaN    45.000000      0.000000       0.000000            NaN             NaN              NaN          91.885000    28.100000               NaN     0.000000
+75%     54682.000000      NaN    61.000000      0.000000       0.000000            NaN             NaN              NaN         114.090000    33.100000               NaN     0.000000
+max     72940.000000      NaN    82.000000      1.000000       1.000000            NaN             NaN              NaN         271.740000    97.600000               NaN     1.000000
+(5110, 12)
+id                     int64
+gender                object
+age                  float64
+hypertension           int64
+heart_disease          int64
+ever_married          object
+work_type             object
+Residence_type        object
+avg_glucose_level    float64
+bmi                  float64
+smoking_status        object
+stroke                 int64
+dtype: object
+                         id       age  hypertension  heart_disease  avg_glucose_level       bmi    stroke
+id                 1.000000  0.003538      0.003550      -0.001296           0.001092  0.003084  0.006388
+age                0.003538  1.000000      0.276398       0.263796           0.238171  0.333398  0.245257
+hypertension       0.003550  0.276398      1.000000       0.108306           0.174474  0.167811  0.127904
+heart_disease     -0.001296  0.263796      0.108306       1.000000           0.161857  0.041357  0.134914
+avg_glucose_level  0.001092  0.238171      0.174474       0.161857           1.000000  0.175502  0.131945
+bmi                0.003084  0.333398      0.167811       0.041357           0.175502  1.000000  0.042374
+stroke             0.006388  0.245257      0.127904       0.134914           0.131945  0.042374  1.000000
+0
+id                  -0.019913
+age                 -0.137059
+hypertension         2.715392
+heart_disease        3.947244
+avg_glucose_level    1.572284
+bmi                  1.055340
+stroke               4.193284
+dtype: float64
+id                   0.006388
+age                  0.245257
+hypertension         0.127904
+heart_disease        0.134914
+avg_glucose_level    0.131945
+bmi                  0.042374
+stroke               1.000000
+dtype: float64
+gender: 
+         -- Unique values:[' Male  ' ' Female' ' Other '] 
+         -- No. of Unique Values: 3 
+         -- Count of Each Unique Values: {' Female': 2994, ' Male  ': 2115, ' Other ': 1}
+ever_married: 
+         -- Unique values:[' Yes         ' ' No          '] 
+         -- No. of Unique Values: 2 
+         -- Count of Each Unique Values: {' Yes         ': 3353, ' No          ': 1757}
+work_type: 
+         -- Unique values:[' Private      ' ' Self-employed' ' Govt_job     ' ' children     '
+ ' Never_worked '] 
+         -- No. of Unique Values: 5 
+         -- Count of Each Unique Values: {' Private      ': 2925, ' Self-employed': 819, ' children     ': 687, ' Govt_job     ': 657, ' Never_worked ': 22}
+Residence_type: 
+         -- Unique values:[' Urban         ' ' Rural         '] 
+         -- No. of Unique Values: 2 
+         -- Count of Each Unique Values: {' Urban         ': 2596, ' Rural         ': 2514}
+smoking_status: 
+         -- Unique values:[' formerly smoked' ' never smoked   ' ' smokes         '
+ ' Unknown        '] 
+         -- No. of Unique Values: 4 
+         -- Count of Each Unique Values: {' never smoked   ': 1892, ' Unknown        ': 1544, ' formerly smoked': 885, ' smokes         ': 789}
+id: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+gender: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+age: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+hypertension: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+heart_disease: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+ever_married: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+work_type: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+Residence_type: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+avg_glucose_level: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+bmi: 
+         -- No. of Missing Values: 201 
+         -- Percentage of Missing Values: 3.9334637964774952%
+smoking_status: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
+stroke: 
+         -- No. of Missing Values: 0 
+         -- Percentage of Missing Values: 0.0%
