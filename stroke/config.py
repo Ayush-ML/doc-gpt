@@ -17,6 +17,8 @@ Y_VAL = r"stroke\data\clean\val\y_val.csv"
 HIGHLY_RIGHT_SKEWED = ['avg_glucose_level']
 MODERATELY_RIGHT_SKEWED = ['bmi']
 BINARY_COLS = ['hypertension', 'heart_disease', 'stroke']
+VALUES_2 = ['gender', 'ever_married', 'residence_type']
+VALUES_OVER_2 = ['work_type', 'smoking_status']
 
 # Values
 

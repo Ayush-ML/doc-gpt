@@ -46,6 +46,8 @@ for cols in cat_cols:
 
 df = df.drop_duplicates()
 
+df = df[df['gender'] != 'Other']  # Remove the 'Other' category from the 'gender' as only 1 entry exsists
+
 # Remove physically impossible values
 
 df = df[(df['age'] > 0) & (df['age'] <= 100)]

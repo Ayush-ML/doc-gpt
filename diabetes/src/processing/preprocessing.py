@@ -4,28 +4,16 @@
 # -- Encoding
 # -- Feature Engineering(Only features fit on training data)
 # -- Feature Selection
-# -- Resampling
 
 # Imported Libraraies
 
 import pandas as pd
-import numpy as np
-from sklearn.preprocessing import StandardScaler, OrdinalEncoder, PowerTransformer, PolynomialFeatures
-from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.preprocessing import OrdinalEncoder, PowerTransformer, PolynomialFeatures
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from diabetes.config import (X_TRAIN, Y_TRAIN, X_TEST, Y_TEST,
-                             TRANSFORMER_METHOD, FEATURE_CREATION_INTERACTION, FEATURE_CREATION_BIAS)
+from diabetes.config import (TRANSFORMER_METHOD, FEATURE_CREATION_INTERACTION, FEATURE_CREATION_BIAS)
 
-# Load The Cleaned data that is split into train an test
-
-X_test = pd.read_csv(X_TEST)
-y_test = pd.read_csv(Y_TEST).squeeze() # Squeeze is necessary to Cinvert a Dataframe to a Series, which is the expected format for y in scikit-learn models.
-
-X_train = pd.read_csv(X_TRAIN)
-y_train = pd.read_csv(Y_TRAIN).squeeze()
-
-def create_preprocessor(X: pd.DataFrame, y: pd.Series) -> ColumnTransformer: # This function is used to create a Preprocessor that can be used in a Pipeline with the model.
+def create_preprocessor(X: pd.DataFrame) -> ColumnTransformer: # This function is used to create a Preprocessor that can be used in a Pipeline with the model.
     # It returns a ColumnTransformer that applies the appropriate transformations to numerical and categorical features.
 
     # Identify Numerical and Categorical Columns
