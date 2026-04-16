@@ -28,10 +28,12 @@ estimator = LogisticRegression(max_iter=MAX_ITER, C=C, class_weight=CLASS_WEIGHT
 cv = StratifiedKFold(n_splits=N_SPLITS, shuffle=SHUFFLE, random_state=RANDOM_STATE)
 
 selector = RFECV(estimator=estimator,
-                step=RFECV_STEP,
                 cv=cv,
+                step=RFECV_STEP,
                 scoring=SCORING,
                 min_features_to_select=RFECV_MIN_FEATURES)
+
+# Create SMOTETomek
 
 smote = SMOTETomek(random_state=RANDOM_STATE)
 

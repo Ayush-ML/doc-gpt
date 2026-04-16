@@ -13,7 +13,7 @@
 import pandas as pd
 import numpy as np
 from scipy.stats import boxcox
-from stroke.config import RAW, BINARY_COLS, HIGHLY_RIGHT_SKEWED, MODERATELY_RIGHT_SKEWED, RANDOM_STATE, X_TEST, X_TRAIN, X_VAL, Y_TEST, Y_TRAIN, Y_VAL, VAL_SIZE, TEST_SIZE
+from stroke.config import RAW, BINARY_COLS, HIGHLY_RIGHT_SKEWED, MODERATELY_RIGHT_SKEWED, RANDOM_STATE, X_TEST, X_TRAIN, X_VAL, Y_TEST, Y_TRAIN, Y_VAL, VAL_SIZE, TEST_SIZE, TARGET, USELESS
 from stroke.utils import engineer_features
 from sklearn.model_selection import train_test_split
 
@@ -30,7 +30,7 @@ for cols in BINARY_COLS:
     df[cols] = df[cols].astype('uint8') # Convert Binary Cols to uint8 to save memory
 df['age'] = df['age'].astype('int64') # Convert Age to Int
 
-df = df.drop(columns=['id']) # Drop Unnecesary Columns
+df = df.drop(columns=USELESS) # Drop Unnecesary Columns
 
 # Define Numerical and Categorical Columns
 
@@ -67,7 +67,7 @@ df = engineer_features(df=df)
 
 # Define Input's and Target Feature
 
-X = df.drop(columns=['stroke'])
+X = df.drop(columns=TARGET)
 y = df['stroke']
 
 

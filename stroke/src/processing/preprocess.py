@@ -9,17 +9,19 @@
 
 import pandas as pd
 import numpy as np
-from stroke.config import VALUES_2, VALUES_OVER_2
+from stroke.config import VALUES_2, VALUES_OVER_2, INTERACTION_ONLY, BIAS
 from sklearn.preprocessing import OrdinalEncoder, PowerTransformer, PolynomialFeatures, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
+
+# Function to create preprocessor using X (input features)
 
 def create_preprocessor(X: pd.DataFrame) -> ColumnTransformer:
 
     num_cols = X.select_dtypes(include=np.number, exclude=np.uint8).columns.to_list()
 
     numerical_pipeline = Pipeline(steps=[
-        ('poly', PolynomialFeatures(interaction_only=True, include_bias=False)),
+        ('poly', PolynomialFeatures(interaction_only=INTERACTION_ONLY, include_bias=BIAS)),
         ('transformer', PowerTransformer())
     ])
     binary_pipeline = Pipeline(steps=[
@@ -29,9 +31,9 @@ def create_preprocessor(X: pd.DataFrame) -> ColumnTransformer:
         ('encoder', OneHotEncoder())
     ])
 
-    preprocessor = ColumnTransformer(transformers=[
+    return ColumnTransformer(transformers=[
         ('numerical', numerical_pipeline, num_cols),
         ('binary', binary_pipeline, VALUES_2),
         ('categorical', categorical_pipeline, VALUES_OVER_2)
     ])
-    return preprocessor
+    
