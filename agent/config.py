@@ -17,10 +17,9 @@ OPENROUTER_API_KEY = "" # IF the provider is cloud based and requires an API key
 # File Paths
 
 SKILLS = r"agent\skills"
-CHROMA = r"agent\memory\chroma"
-SESSIONS = r"agent\memory\sessions"
-USERS = r"agent\memory\users"
+USERS = r"agent\users"
 CHECKPOINTS = r"agent\memory\checkpoint.db"
+INDEX = r"agent\skills\index.json"
 
 # Values
 
@@ -28,7 +27,7 @@ TEMPERATURE = 0.3
 
 # Prompts
 
-STEP_1_PHASE_A = """
+STEP_1_PHASE_1 = """
 
 You are a clinical skill selector. Your only job is to read a list of available skills and select the ones relevant to the patient's case.
 
@@ -36,15 +35,15 @@ You are a clinical skill selector. Your only job is to read a list of available 
 - You will be given a dictionary of skills in the format { title: summary }
 - You will be given the patient's message
 - Read each skill title and summary carefully
-- Select only the skills that are directly relevant to the symptoms or context described
-- Return ONLY a plain list of selected skill titles, one per line
-- Do not explain your choices
-- Do not return anything else
+- Select NOT the skills that are directly relevant to the symptoms or context described
+- Return ONLY a plain list of selected skill titles
+- Do NOT explain your choices
+- Do NOT return anything else
 - If no skills are relevant, return the word NONE
 
 ## Example Output
 
-[Chest Pain Differential, Hypertensive Crisis Management, Diabetic Ketoacidosis Workup]
+[chest_pain_differential, hypertensive_crisis_management, diabetic_workup]
 
 The title of the skill and the Skill name given in the List Should ALWAYS match EXACTLY
 

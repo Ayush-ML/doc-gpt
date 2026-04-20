@@ -4,20 +4,20 @@
 
 # File Paths
 
-RAW = r"stroke\data\raw\healthcare-dataset-stroke-data.csv"
-X_TRAIN = r"stroke\data\clean\train\X_train.csv"
-Y_TRAIN = r"stroke\data\clean\train\y_train.csv"
-X_TEST = r"stroke\data\clean\test\X_test.csv"
-Y_TEST = r"stroke\data\clean\test\y_test.csv"
-X_VAL = r"stroke\data\clean\val\X_val.csv"
-Y_VAL = r"stroke\data\clean\val\y_val.csv"
-LOGS = r'stroke\reports\tuning'
-HYPERPARAMS = r"stroke\models\tuned_hyperparams.json"
-TRIAL_HISTROY = r"stroke\reports\tuning\trial_history"
-TRIAL_DATA = r"stroke\reports\tuning\trial_data.json"
-TRIAL_SUMMARY = r"stroke\reports\tuning\trial_summary.txt"
-TRIAL_PLOTS = r"stroke\reports\tuning\tuning_graphs"
-EVAL_DATA = r"stroke\reports\tuning\eval_data"
+RAW = r"models\stroke\data\raw\healthcare-dataset-stroke-data.csv"
+X_TRAIN = r"models\stroke\data\clean\train\X_train.csv"
+Y_TRAIN = r"models\stroke\data\clean\train\y_train.csv"
+X_TEST = r"models\stroke\data\clean\test\X_test.csv"
+Y_TEST = r"models\stroke\data\clean\test\y_test.csv"
+X_VAL = r"models\stroke\data\clean\val\X_val.csv"
+Y_VAL = r"models\stroke\data\clean\val\y_val.csv"
+LOGS = r'models\stroke\reports\tuning'
+HYPERPARAMS = r"models\stroke\models\tuned_hyperparams.json"
+TRIAL_HISTROY = r"models\stroke\reports\tuning\trial_history"
+TRIAL_DATA = r"models\stroke\reports\tuning\trial_data.json"
+TRIAL_SUMMARY = r"models\stroke\reports\tuning\trial_summary.txt"
+TRIAL_PLOTS = r"models\stroke\reports\tuning\tuning_graphs"
+EVAL_DATA = r"models\stroke\reports\tuning\eval_data"
 
 
 # Lists
