@@ -1,0 +1,28 @@
+2026-04-17 15:40:07,941 - optuna.storages._in_memory - INFO - A new study created in memory with name: no-name-1edd8b9d-e678-4aa9-a789-1c51f113d758
+2026-04-17 15:40:07,964 - optuna.study._optimize - WARNING - Trial 0 failed with parameters: {'n_estimators': 500, 'max_depth': 7, 'learning_rate': 0.05395030966670229, 'min_child_samples': 14, 'subsample': 0.6624074561769746, 'colsample_bytree': 0.662397808134481, 'reg_alpha': 0.02904180608409973, 'reg_lambda': 4.46470458309974, 'scale_pos_weight': 24.01672517614813, 'num_leaves': 112, 'min_split_gain': 0.020584494295802447, 'subsample_freq': 10, 'step': 9, 'min_features_to_select': 8, 'selector_n_splits': 4, 'C': 0.023270677083837805, 'max_iter': 956, 'tol': 0.00037520558551242813, 'fit_intercept': True, 'warm_start': True} because of the following error: AttributeError("'StratifiedKFold' object has no attribute 'set_params'").
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\optuna\study\_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\KANNAN\.vscode\doc-gpt\stroke\src\models\tune.py", line 87, in objective
+    pipeline.set_params(**params)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 357, in set_params
+    valid_params[key].set_params(**sub_params)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 357, in set_params
+    valid_params[key].set_params(**sub_params)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\pipeline.py", line 319, in set_params
+    self._set_params("steps", **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\metaestimators.py", line 69, in _set_params
+    super().set_params(**params)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 357, in set_params
+    valid_params[key].set_params(**sub_params)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 357, in set_params
+    valid_params[key].set_params(**sub_params)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'StratifiedKFold' object has no attribute 'set_params'
+2026-04-17 15:40:08,038 - optuna.study._optimize - WARNING - Trial 0 failed with value None.

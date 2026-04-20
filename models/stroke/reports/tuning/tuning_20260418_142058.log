@@ -1,0 +1,24 @@
+2026-04-18 14:20:58,639 - optuna.storages._in_memory - INFO - A new study created in memory with name: no-name-4897203f-6d8e-41da-a908-25b96269a8fc
+2026-04-18 14:20:58,702 - optuna.study._optimize - WARNING - Trial 0 failed with parameters: {'n_estimators': 500, 'max_depth': 7, 'learning_rate': 0.05395030966670229, 'min_child_samples': 14, 'subsample': 0.6624074561769746, 'colsample_bytree': 0.662397808134481, 'reg_alpha': 0.02904180608409973, 'reg_lambda': 4.46470458309974, 'scale_pos_weight': 24.01672517614813, 'num_leaves': 112, 'min_split_gain': 0.020584494295802447, 'subsample_freq': 10, 'step': 9, 'min_features_to_select': 8, 'C': 0.02310201887845294, 'max_iter': 775, 'tol': 8.17949947521167e-05, 'fit_intercept': True, 'warm_start': False} because of the following error: TypeError("TunedThresholdClassifierCV.fit got unexpected argument(s) {'callbacks', 'eval_set'}, which are not routed to any object.").
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\optuna\study\_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\KANNAN\.vscode\doc-gpt\stroke\src\models\tune.py", line 102, in objective
+    pipeline.fit(X_fold_train, y_fold_train, eval_set=[(X_fold_val, y_fold_val)], callbacks=[pruning, lgbm.early_stopping(50), lgbm.log_evaluation(-1), lgbm.record_evaluation(eval_data)])
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 1365, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_classification_threshold.py", line 135, in fit
+    self._fit(X, y, **params)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_classification_threshold.py", line 748, in _fit
+    routed_params = process_routing(self, "fit", **params)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 1625, in process_routing
+    request_routing.validate_metadata(params=kwargs, method=_method)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 1109, in validate_metadata
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: TunedThresholdClassifierCV.fit got unexpected argument(s) {'callbacks', 'eval_set'}, which are not routed to any object.
+2026-04-18 14:20:58,714 - optuna.study._optimize - WARNING - Trial 0 failed with value None.

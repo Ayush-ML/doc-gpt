@@ -1,0 +1,85 @@
+2026-04-18 23:39:37,207 - optuna.storages._in_memory - INFO - A new study created in memory with name: no-name-6c84b483-8e6a-47f7-be2b-715e550fb23b
+2026-04-18 23:39:37,262 - optuna.study._optimize - WARNING - Trial 0 failed with parameters: {'n_estimators': 500, 'max_depth': 7, 'learning_rate': 0.05395030966670229, 'min_child_samples': 14, 'subsample': 0.6624074561769746, 'colsample_bytree': 0.662397808134481, 'reg_alpha': 0.02904180608409973, 'reg_lambda': 4.46470458309974, 'scale_pos_weight': 24.01672517614813, 'num_leaves': 112, 'min_split_gain': 0.020584494295802447, 'subsample_freq': 10, 'step': 9, 'min_features_to_select': 8, 'C': 0.02310201887845294, 'max_iter': 775, 'tol': 8.17949947521167e-05, 'fit_intercept': True, 'warm_start': False} because of the following error: ValueError('Specifying the columns using strings is only supported for dataframes.').
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_indexing.py", line 420, in _get_column_indices
+    all_columns = X.columns
+                  ^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'columns'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\optuna\study\_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\KANNAN\.vscode\doc-gpt\stroke\src\models\tune.py", line 100, in objective
+    pipeline.fit(X_train, y_train)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 1365, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_classification_threshold.py", line 135, in fit
+    self._fit(X, y, **params)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_classification_threshold.py", line 776, in _fit
+    self.estimator_.fit(X_train, y_train, **fit_params_train)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 1365, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\calibration.py", line 424, in fit
+    self.calibrated_classifiers_ = parallel(
+                                   ~~~~~~~~^
+        delayed(_fit_classifier_calibrator_pair)(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        for train, test in cv.split(X, y, **routed_params.splitter.split)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\parallel.py", line 82, in __call__
+    return super().__call__(iterable_with_config_and_warning_filters)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\joblib\parallel.py", line 1986, in __call__
+    return output if self.return_generator else list(output)
+                                                ~~~~^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\joblib\parallel.py", line 1914, in _get_sequential_output
+    res = func(*args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\parallel.py", line 147, in __call__
+    return self.function(*args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\calibration.py", line 626, in _fit_classifier_calibrator_pair
+    estimator.fit(X_train, y_train, **fit_params_train)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 1365, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\pipeline.py", line 655, in fit
+    Xt = self._fit(X, y, routed_params, raw_params=params)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\pipeline.py", line 589, in _fit
+    X, fitted_transformer = fit_transform_one_cached(
+                            ~~~~~~~~~~~~~~~~~~~~~~~~^
+        cloned_transformer,
+        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        params=step_params,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\joblib\memory.py", line 326, in __call__
+    return self.func(*args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\pipeline.py", line 1540, in _fit_transform_one
+    res = transformer.fit_transform(X, y, **params.get("fit_transform", {}))
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 1365, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\compose\_column_transformer.py", line 988, in fit_transform
+    self._validate_column_callables(X)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\compose\_column_transformer.py", line 541, in _validate_column_callables
+    transformer_to_input_indices[name] = _get_column_indices(X, columns)
+                                         ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_indexing.py", line 422, in _get_column_indices
+    raise ValueError(
+        "Specifying the columns using strings is only supported for dataframes."
+    )
+ValueError: Specifying the columns using strings is only supported for dataframes.
+2026-04-18 23:39:37,338 - optuna.study._optimize - WARNING - Trial 0 failed with value None.

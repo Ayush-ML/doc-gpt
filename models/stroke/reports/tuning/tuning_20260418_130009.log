@@ -1,0 +1,84 @@
+2026-04-18 13:00:09,369 - optuna.storages._in_memory - INFO - A new study created in memory with name: no-name-ae41d060-6fb8-4125-aa4e-c0f0699a7937
+2026-04-18 13:00:09,403 - optuna.study._optimize - WARNING - Trial 0 failed with parameters: {'n_estimators': 500, 'max_depth': 7, 'learning_rate': 0.05395030966670229, 'min_child_samples': 14, 'subsample': 0.6624074561769746, 'colsample_bytree': 0.662397808134481, 'reg_alpha': 0.02904180608409973, 'reg_lambda': 4.46470458309974, 'scale_pos_weight': 24.01672517614813, 'num_leaves': 112, 'min_split_gain': 0.020584494295802447, 'subsample_freq': 10, 'step': 9, 'min_features_to_select': 8, 'C': 0.02310201887845294, 'max_iter': 775, 'tol': 8.17949947521167e-05, 'fit_intercept': True, 'warm_start': False} because of the following error: ValueError("'average_percision' is not a valid scoring value. Use sklearn.metrics.get_scorer_names() to get valid options.").
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\metrics\_scorer.py", line 460, in get_scorer
+    scorer = copy.deepcopy(_SCORERS[scoring])
+                           ~~~~~~~~^^^^^^^^^
+KeyError: 'average_percision'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\optuna\study\_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\KANNAN\.vscode\doc-gpt\stroke\src\models\tune.py", line 99, in objective
+    pipeline.fit(X_fold_train, y_fold_train,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 estimator__estimator__model__eval_set=[(X_fold_val, y_fold_val)],
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 estimator__estimator__model__callbacks=[pruning, lgbm.early_stopping(50), lgbm.log_evaluation(-1), lgbm.record_evaluation(eval_result=eval_data)])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 1365, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_classification_threshold.py", line 135, in fit
+    self._fit(X, y, **params)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_classification_threshold.py", line 748, in _fit
+    routed_params = process_routing(self, "fit", **params)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 1624, in process_routing
+    request_routing = get_routing_for_object(_obj)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 1185, in get_routing_for_object
+    return deepcopy(obj.get_metadata_routing())
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_classification_threshold.py", line 868, in get_metadata_routing
+    .add(
+     ~~~^
+        estimator=self.estimator,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+        method_mapping=MethodMapping().add(callee="fit", caller="fit"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 898, in add
+    mapping=method_mapping, router=get_routing_for_object(obj)
+                                   ~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 1185, in get_routing_for_object
+    return deepcopy(obj.get_metadata_routing())
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\calibration.py", line 554, in get_metadata_routing
+    .add(
+     ~~~^
+        estimator=self._get_estimator(),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        method_mapping=MethodMapping().add(caller="fit", callee="fit"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 898, in add
+    mapping=method_mapping, router=get_routing_for_object(obj)
+                                   ~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 1185, in get_routing_for_object
+    return deepcopy(obj.get_metadata_routing())
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\imblearn\pipeline.py", line 1211, in get_metadata_routing
+    router.add(method_mapping=method_mapping, **{name: trans})
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 898, in add
+    mapping=method_mapping, router=get_routing_for_object(obj)
+                                   ~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 1185, in get_routing_for_object
+    return deepcopy(obj.get_metadata_routing())
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\feature_selection\_rfe.py", line 1012, in get_metadata_routing
+    scorer=self._get_scorer(),
+           ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\feature_selection\_rfe.py", line 1025, in _get_scorer
+    return get_scorer(scoring)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_param_validation.py", line 218, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\metrics\_scorer.py", line 462, in get_scorer
+    raise ValueError(
+    ...<3 lines>...
+    )
+ValueError: 'average_percision' is not a valid scoring value. Use sklearn.metrics.get_scorer_names() to get valid options.
+2026-04-18 13:00:09,492 - optuna.study._optimize - WARNING - Trial 0 failed with value None.

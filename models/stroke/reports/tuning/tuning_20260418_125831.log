@@ -1,0 +1,23 @@
+2026-04-18 12:58:31,837 - optuna.storages._in_memory - INFO - A new study created in memory with name: no-name-245ff975-29f3-4f4c-852c-26cfa6a87015
+2026-04-18 12:58:31,864 - optuna.study._optimize - WARNING - Trial 0 failed with parameters: {'n_estimators': 500, 'max_depth': 7, 'learning_rate': 0.05395030966670229, 'min_child_samples': 14, 'subsample': 0.6624074561769746, 'colsample_bytree': 0.662397808134481, 'reg_alpha': 0.02904180608409973, 'reg_lambda': 4.46470458309974, 'scale_pos_weight': 24.01672517614813, 'num_leaves': 112, 'min_split_gain': 0.020584494295802447, 'subsample_freq': 10, 'step': 9, 'min_features_to_select': 8, 'C': 0.02310201887845294, 'max_iter': 775, 'tol': 8.17949947521167e-05, 'fit_intercept': True, 'warm_start': False} because of the following error: ValueError("Passing extra keyword arguments to TunedThresholdClassifierCV is only supported if enable_metadata_routing=True, which you can set using `sklearn.set_config`. See the User Guide <https://scikit-learn.org/stable/metadata_routing.html> for more details. Extra parameters passed are: {'estimator__estimator__model__callbacks', 'estimator__estimator__model__eval_set'}").
+Traceback (most recent call last):
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\optuna\study\_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "C:\Users\KANNAN\.vscode\doc-gpt\stroke\src\models\tune.py", line 94, in objective
+    pipeline.fit(X_fold_train, y_fold_train,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 estimator__estimator__model__eval_set=[(X_fold_val, y_fold_val)],
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 estimator__estimator__model__callbacks=[pruning, lgbm.early_stopping(50), lgbm.log_evaluation(-1), lgbm.record_evaluation(eval_result=eval_data)])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\base.py", line 1365, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\model_selection\_classification_threshold.py", line 125, in fit
+    _raise_for_params(params, self, None)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KANNAN\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\utils\_metadata_requests.py", line 186, in _raise_for_params
+    raise ValueError(
+    ...<5 lines>...
+    )
+ValueError: Passing extra keyword arguments to TunedThresholdClassifierCV is only supported if enable_metadata_routing=True, which you can set using `sklearn.set_config`. See the User Guide <https://scikit-learn.org/stable/metadata_routing.html> for more details. Extra parameters passed are: {'estimator__estimator__model__callbacks', 'estimator__estimator__model__eval_set'}
+2026-04-18 12:58:31,875 - optuna.study._optimize - WARNING - Trial 0 failed with value None.
