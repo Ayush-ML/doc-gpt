@@ -20,6 +20,7 @@ SKILLS = r"agent\skills"
 USERS = r"agent\users"
 CHECKPOINTS = r"agent\memory\checkpoint.db"
 INDEX = r"agent\skills\index.json"
+HISTORY = r"agent\memory\history"
 
 # Values
 
