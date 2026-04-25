@@ -14,21 +14,6 @@ def _get_step_response(current_step: int, state: AgentState) -> str:
     step_response = state[f'step{current_step}_response']
     return step_response
 
-# Create a Function to clean the models Response
-def _clean(response: str) -> dict:
-        try:
-            clean = response.strip()
-            if clean.startswith("```"):
-                clean = clean.split("```")[1]
-                if clean.startswith("json"):
-                    clean = clean[4:]
-            return json.loads(clean.strip())
-        except Exception:
-            return {
-            "approved": False,
-            "reason": "Gatekeeper failed to parse response."
-        }
-
 # Create the Function that handles what happens in the Node
 
 def run(state: AgentState) -> dict:
@@ -55,7 +40,7 @@ def run(state: AgentState) -> dict:
     ]
 
     response = gatekeeper.invoke(messages)
-    response = _clean(response.content)
+    response = response.content
     return {
         "gatekeeper_decision": response['approved'],
         "gatekeeper_reason": response['reason']
