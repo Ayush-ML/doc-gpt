@@ -26,6 +26,10 @@ HISTORY = r"agent\memory\history"
 
 TEMPERATURE = 0.3
 
+# User Info
+
+EMAIL = "ayushmanoj279@gmail.com"
+
 # Prompts
 
 GATEKEEPER_PROMPT = """

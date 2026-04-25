@@ -28,9 +28,3 @@ def parse_end_response(response: str) -> tuple[str, str, int | None]:
 def strip_end_response(response: str) -> str:
     pattern = r'<END_RESPONSE[^/]*/>'
     return re.sub(pattern, "", response).strip()
-
-# A function to parse all Tools and execute them in the models response
-
-def parse_tools(response: str) -> None:
-    pass
-

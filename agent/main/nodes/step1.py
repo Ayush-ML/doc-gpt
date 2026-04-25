@@ -4,7 +4,7 @@
 
 from agent.config import STEP_1_PHASE_A, STEP_1_PHASE_B
 from agent.main.state import AgentState
-from agent.utils import parse_end_response, parse_tools, strip_end_response
+from agent.utils import parse_end_response, strip_end_response
 from agent.main.router import get_agent
 
 # Create a function that handles Phase A of Step 1
@@ -54,9 +54,6 @@ def run(state: AgentState) -> dict:
     for chunk in agent.stream(phase_b_context):
         print(chunk.content, end="", flush=True)
         phase_b_response += chunk.content
-
-
-    parse_tools(response=phase_b_response)
 
     reason, next_dir, target = parse_end_response(response=phase_b_response)
 

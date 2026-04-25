@@ -6,7 +6,9 @@
 
 from typing import Annotated, Literal, TypedDict
 from operator import add
+from dataclasses import dataclass
 
+@dataclass
 class AgentState(TypedDict):
     # -- Session Data
 
