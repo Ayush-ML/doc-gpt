@@ -32,7 +32,7 @@ class AgentState(TypedDict):
     question: str | None # Calrification Tool
     answer: str | None
 
-    rag_results: dict
+    rag_results: Annotated[list[dict], add]
 
     prediction: Annotated[list[dict], add]
 
@@ -42,7 +42,7 @@ class AgentState(TypedDict):
 
     all_skills: dict[str, str]
     clinical_profile: str
-    semantic_search: dict
+    semantic_search: list
 
     # Analysis Node
 
