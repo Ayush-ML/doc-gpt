@@ -29,9 +29,6 @@ class AgentState(TypedDict):
     requested_next: Literal["forward", "back"]
     requested_target_step: int | None 
 
-    question: str | None # Calrification Tool
-    answer: str | None
-
     rag_results: Annotated[list[dict], add]
 
     prediction: Annotated[list[dict], add]
@@ -66,7 +63,3 @@ class AgentState(TypedDict):
 
     gatekeeper_decision: bool
     gatekeeper_reason: str
-
-    # Control Flag
-
-    should_end: bool
