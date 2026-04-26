@@ -2,7 +2,7 @@
 # which is responsible for the Models Analysis of the Users Symptoms
 # Imported Libraries
 
-from agent.config import STEP_1_PHASE_A, STEP_1_PHASE_B
+from agent.steps.prompts import STEP_1_PHASE_A, STEP_1_PHASE_B
 from agent.main.state import AgentState
 from agent.utils import parse_end_response, strip_end_response
 from agent.main.router import get_agent

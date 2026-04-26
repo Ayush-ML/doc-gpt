@@ -4,7 +4,7 @@
 
 from agent.main.state import AgentState
 from agent.main.router import get_gatekeeper
-from agent.config import GATEKEEPER_PROMPT
+from agent.steps.prompts import GATEKEEPER_PROMPT
 
 # Create the Function that handles what happens in the Node
 

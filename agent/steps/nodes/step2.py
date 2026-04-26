@@ -7,7 +7,7 @@ from agent.tools.semantic_search import semantic_search
 from agent.tools.drug_lookup import drug_lookup
 from agent.main.router import get_agent
 from agent.main.state import AgentState
-from agent.config import STEP_2_PROMPT
+from agent.steps.prompts import STEP_2_PROMPT
 from agent.utils import strip_end_response, parse_end_response
 
 # Create The Run function that is passed to LangGraph and handles the flow of the Second Node
