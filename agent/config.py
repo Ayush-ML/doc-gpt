@@ -18,7 +18,7 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 SKILLS = r"agent\skills"
 USERS = r"agent\users"
 CHECKPOINTS = r"agent\memory\checkpoint.db"
-INDEX = r"agent\skills\index.json"
+INDEX = r"agent\skills\index.jsonl"
 HISTORY = r"agent\memory\history"
 
 # Values

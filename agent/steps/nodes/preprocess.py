@@ -13,9 +13,12 @@ from agent.memory.chroma import search
 def run(state: AgentState) -> dict:
     user_message = state['messages'][0]['message'] # Load User Message
     user_id = state['user_id'] # User ID
+    all_skills = {}
 
     with open(INDEX, "r") as file: # Load Skills Index
-        all_skills = json.load(file)
+        for line in file.read():
+            entry = json.loads(line.strip())
+            all_skills.update(entry)
 
     with open(f"agent\users\{user_id}\USER.md", "r") as file: # Load Clinical Profile
         clinical_profile = file.read()

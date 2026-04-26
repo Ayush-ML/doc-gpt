@@ -1,6 +1,6 @@
-# profile_updater.py
 # Runs after Step 4 — updates USER.md with new clinical information
 # No gatekeeper — always runs, always writes
+# Imported Libraries
 
 from agent.main.state import AgentState
 from agent.main.router import get_agent
