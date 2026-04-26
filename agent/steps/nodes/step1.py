@@ -63,6 +63,14 @@ def run(state: AgentState) -> dict:
     reason, next_dir, target = parse_end_response(response=phase_b_response)
 
     return {
+        "retries": {
+        **state['retries'],
+        state['current_step']: state['retries'].get(state['current_step'], 0) + 1
+        },
+        "max_reached_step": max(
+            state['max_reached_step'],
+            state['current_step']
+        ),
         "used_skills": skills,
         "skill_contents": skill_contents,
         "end_response_reason": reason,

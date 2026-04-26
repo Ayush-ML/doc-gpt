@@ -42,6 +42,14 @@ def run(state: AgentState) -> dict:
     # Return and Write Everything to AgentState using LangGraph
 
     return {
+        "retries": {
+        **state['retries'],
+        state['current_step']: state['retries'].get(state['current_step'], 0) + 1
+        },
+        "max_reached_step": max(
+            state['max_reached_step'],
+            state['current_step']
+        ),
         "end_response_reason": reason,
         "requested_next": next_dir,
         "requested_target_step": target,
