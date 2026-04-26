@@ -11,7 +11,6 @@ from diabetes.config import MODEL
 pipeline = mlflow.sklearn.load_model(MODEL)
 
 def predict_diabetes(input_data: dict, threshold: float=0.3) -> dict:
-    """"""
     # Convert input data to a pandas DataFrame
     df = pd.DataFrame([input_data])
     

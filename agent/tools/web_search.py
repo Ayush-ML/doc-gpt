@@ -4,6 +4,7 @@
 
 from langchain_core.tools import tool
 from langchain_community.tools import DuckDuckGoSearchResults
+from agent.config import N_RESULTS
 
 # Initialize DuckDuckGo with Parameters
 
@@ -12,7 +13,7 @@ _search = None
 def _get_search(): # Lazy Initialization
     global _search
     if _search is None:
-        _search = DuckDuckGoSearchResults(num_results=5, output_format='list')
+        _search = DuckDuckGoSearchResults(num_results=N_RESULTS, output_format='list')
     return _search
 
 # Create the function that will be passed to the model

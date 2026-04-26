@@ -6,6 +6,7 @@ from langchain_core.tools import tool
 from langchain_community.utilities.pubmed import PubMedAPIWrapper
 from langchain_community.tools.pubmed.tool import PubmedQueryRun
 from agent.config import EMAIL
+from agent.config import N_RESULTS
 
 _pubmed = None
 _wrapper = None
@@ -15,7 +16,7 @@ _wrapper = None
 def _get_pubmed() -> PubmedQueryRun | None:
     global _pubmed, _wrapper
     if _pubmed is None and _wrapper is None:
-        _wrapper = PubMedAPIWrapper(top_k_results=5, email=EMAIL)
+        _wrapper = PubMedAPIWrapper(top_k_results=N_RESULTS, email=EMAIL)
         _pubmed = PubmedQueryRun(api_wrapper=_wrapper)
     return _pubmed
 
