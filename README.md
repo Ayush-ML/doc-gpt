@@ -1,6 +1,6 @@
 <div align="center">
 
-![Banner](./banner.png)
+![Project Banner](./assets/banner.png)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
