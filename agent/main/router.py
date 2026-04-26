@@ -11,7 +11,7 @@ def _openrouter(model: str) -> ChatOpenRouter:
 def _ollama(model: str) -> ChatOllama:
     return ChatOllama(model=model, temperature=TEMPERATURE, base_url=OLLAMA_BASE_URL)
 
-def _get_model(model: str):
+def _get_model(model: str) -> ChatOllama | ChatOpenRouter:
     providers = {
         'ollama': _ollama,
         'openrouter': _openrouter
@@ -21,8 +21,8 @@ def _get_model(model: str):
     
     return providers[PROVIDER](model)
 
-def get_agent():
+def get_agent() -> ChatOllama | ChatOpenRouter:
     return _get_model(model=AGENT)
 
-def get_gatekeeper():
+def get_gatekeeper() -> ChatOllama | ChatOpenRouter:
     return _get_model(model=GATEKEEPER)

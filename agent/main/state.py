@@ -31,35 +31,16 @@ class AgentState(TypedDict):
     requested_next: Literal["forward", "back"]
     requested_target_step: int | None 
 
-    rag_results: Annotated[list[dict], add]
-
-    prediction: Annotated[list[dict], add]
-
-    search_results: list[dict]
-
     # Preporcessing Node
 
     all_skills: dict[str, str]
     clinical_profile: str
     semantic_search: list
 
-    # Analysis Node
+    # Skills 
 
     used_skills: list[str]
     skill_contents: list[str]
-    step1_response: str
-
-    # Statistics Node
-
-    step2_response: str
-
-    # Verification Node
-
-    step3_response: str
-
-    # Report Node
-
-    step4_response: str
 
     # Gatekeeper
 
