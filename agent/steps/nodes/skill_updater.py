@@ -10,6 +10,7 @@ from agent.config import SKILLS, INDEX
 from agent.main.router import get_agent
 from agent.steps.prompts import SKILL_WRITER_PROMPT
 from agent.memory.chroma import write_memory, session_exists
+from langchain_core.messages import HumanMessage, AIMessage
 
 # Create A function that will parse the models response and convert to json
 
@@ -40,7 +41,11 @@ def run(state: AgentState) -> dict:
 
     # Build Agent Context
 
-    user_message = f"User's Clinical Profile: {clinical_profile}, All Skill titles and summaries that currently exsist: {all_skills}, Current Session Chat History: {messages}"
+    session_text = "\n".join([
+    f"{'User' if isinstance(m, HumanMessage) else 'Agent'}: {m.content}"
+    for m in messages
+    ])
+    user_message = f"User's Clinical Profile: {clinical_profile}, All Skill titles and summaries that currently exsist: {all_skills}, Current Session Chat History: {session_text}"
     context = [
         {"role": "system", "content": SKILL_WRITER_PROMPT},
         {"role": "user", "content": user_message}

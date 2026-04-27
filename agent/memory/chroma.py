@@ -5,6 +5,7 @@
 import chromadb
 from datetime import datetime
 from agent.config import HISTORY
+from langchain_core.messages import HumanMessage, AIMessage
 
 _client = None
 _collection = None
@@ -22,13 +23,17 @@ def _get_chroma() -> chromadb.Collection:
 # Create a Function that writes The Session upon end to ChormaDb
 
 def write_memory(session_id: str, messages: list[dict]) -> None:
+     valid_messages = [m for m in messages if m.content.strip()]
+     if not valid_messages:
+        return
+
      collection = _get_chroma()
-     ids = [f"{session_id}_{i}" for i in range(len(messages))]
-     documents = [m['message'] for m in messages]
+     ids = [f"{session_id}_{i}" for i in range(len(valid_messages))]
+     documents = [m.content for m in messages]
      metadatas = [
         {
             "session_id": session_id,
-            "role": m["role"],
+            "role": "user" if isinstance(m, HumanMessage) else "agent",
             "index": i,
             "time": datetime.now()
         }
@@ -39,6 +44,9 @@ def write_memory(session_id: str, messages: list[dict]) -> None:
 # Create a Function in order to Retrieve Relevant Results
 
 def search(user_query: str, n_results: int = 5) -> list:
+    if collection.count() == 0:
+        return []
+
     collection = _get_chroma()
     results = collection.query(n_results=n_results, query_texts=[user_query])
     

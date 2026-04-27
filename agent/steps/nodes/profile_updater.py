@@ -5,6 +5,7 @@
 from agent.main.state import AgentState
 from agent.main.router import get_agent
 from agent.config import PROFILE_UPDATER_PROMPT
+from langchain_core.messages import AIMessage, HumanMessage
 
 
 def run(state: AgentState) -> dict:
@@ -15,7 +16,12 @@ def run(state: AgentState) -> dict:
 
     agent = get_agent()
 
-    user_message = f"Current Clinical Profile:\n{clinical_profile}\n\nFull Session:\n{messages}"
+    session_text = "\n".join([
+    f"{'User' if isinstance(m, HumanMessage) else 'Agent'}: {m.content}"
+    for m in messages
+    ])
+
+    user_message = f"Current Clinical Profile:\n{clinical_profile}\n\nFull Session:\n{session_text}"
     context = [
         {"role": "system", "content": PROFILE_UPDATER_PROMPT},
         {"role": "user", "content": user_message}

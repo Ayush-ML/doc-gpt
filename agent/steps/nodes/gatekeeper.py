@@ -21,7 +21,7 @@ def run(state: AgentState) -> dict:
             "gatekeeper_reason": "Backward request always approved.",
         }
     
-    agent_response = messages[-1]['message'] # Get Step Response ofr current Step
+    agent_response = messages[-1].content # Get Step Response of current Step
     
     user_message = f"Current Step: {current_step}, Agent's Reason for Ending Response: {end_response_reason}, Agents's Entire Response: {agent_response}" # Build Gatekeeper Content
 

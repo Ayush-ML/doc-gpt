@@ -9,6 +9,7 @@ from agent.main.router import get_agent
 from agent.main.state import AgentState
 from agent.steps.prompts import STEP_2_PROMPT
 from agent.utils import strip_end_response, parse_end_response
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 # Create The Run function that is passed to LangGraph and handles the flow of the Second Node
 
@@ -29,9 +30,9 @@ def run(state: AgentState) -> dict:
 
     user_message = f"Message History: {messages}, Selected Skill Contents: {skill_contents}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {sem_search}"
     context = [
-        {"role": "system", "content": STEP_2_PROMPT},
-        {"role": "user", "content": user_message}
-    ]
+    SystemMessage(content=STEP_2_PROMPT),
+    HumanMessage(content=user_message)
+    ] # Build Context
 
     # Get Models Response
 
@@ -53,5 +54,5 @@ def run(state: AgentState) -> dict:
         "end_response_reason": reason,
         "requested_next": next_dir,
         "requested_target_step": target,
-        "messages": [{"role": "agent", "message": response}] # Append The models response to Messages
+        "messages": [AIMessage(content=response)] # Append The models response to Messages
     }

@@ -7,6 +7,7 @@ from agent.steps.prompts import STEP_4_PROMPT
 from agent.main.state import AgentState
 from agent.main.router import get_agent
 from agent.utils import strip_end_response, parse_end_response
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 # Create the Run Function that handles the Node
 
@@ -25,10 +26,10 @@ def run(state: AgentState) -> dict:
     # Build Context for Agent
 
     user_message = f"Message History: {messages}, Selected Skill Contents: {skill_contents}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {semantic_search}"
-    context = [
-        {"role": "system", "content": STEP_4_PROMPT},
-        {"role": "user", "content": user_message}
-    ]
+    context = context = [
+    SystemMessage(content=STEP_4_PROMPT),
+    HumanMessage(content=user_message)
+    ] # Build Context
 
     # Get Agents Response
 
@@ -50,5 +51,5 @@ def run(state: AgentState) -> dict:
         "requested_next": next_dir,
         "requested_target_step": target,
         "end_response_reason": reason,
-        "messages": [{"role": "agent", "message": response}] # Append The models response to Messages
+        "messages": [AIMessage(content=response)] # Append The models response to Messages
     }

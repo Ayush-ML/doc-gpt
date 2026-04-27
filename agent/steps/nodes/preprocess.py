@@ -11,7 +11,7 @@ from agent.memory.chroma import search
 # The function that is passed to LangGraph and is responsible for the Node
 
 def run(state: AgentState) -> dict:
-    user_message = state['messages'][0]['message'] # Load User Message
+    user_message = state['messages'][0].content # Load User Message
     user_id = state['user_id'] # User ID
     all_skills = {}
 

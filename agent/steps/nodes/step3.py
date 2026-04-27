@@ -10,6 +10,7 @@ from agent.tools.web_search import web_search
 from agent.steps.prompts import STEP_3_PROMPT
 from agent.main.state import AgentState
 from agent.main.router import get_agent
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from agent.utils import strip_end_response, parse_end_response
 
 # Create The Run function that handles the Third Node
@@ -31,9 +32,9 @@ def run(state: AgentState) -> dict:
 
     user_message = f"Message History: {messages}, Selected Skill Contents: {skill_contents}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {sem_search}"
     context = [
-        {"role": "system", "content": STEP_3_PROMPT},
-        {"role": "user", "content": user_message}
-    ]
+    SystemMessage(content=STEP_3_PROMPT),
+    HumanMessage(content=user_message)
+    ] # Build Context
 
     # Get Agents Response
 
@@ -55,5 +56,5 @@ def run(state: AgentState) -> dict:
         "requested_next": next_dir,
         "requested_target_step": target,
         "end_response_reason": reason,
-        "messages": [{"role": "agent", "message": response}] # Append The models response to Messages
+        "messages": [AIMessage(content=response)] # Append The models response to Messages
     }

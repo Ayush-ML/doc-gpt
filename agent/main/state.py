@@ -7,6 +7,7 @@
 from typing import Annotated, Literal, TypedDict
 from operator import add
 from dataclasses import dataclass
+from langchain_core.messages import BaseMessage
 
 @dataclass
 class AgentState(TypedDict):
@@ -23,7 +24,7 @@ class AgentState(TypedDict):
 
     # Session Handling
 
-    messages: Annotated[list[dict], add]
+    messages: Annotated[list[BaseMessage], add]
 
     # Tools
 
