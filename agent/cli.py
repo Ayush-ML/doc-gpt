@@ -29,7 +29,6 @@ console = Console()
     # klini init - Initializes All Directories
     # klini register - The user can input their own info such as API Key's, Email, basic Clinical Data etc
     # klini start - Creates a Brand New session with the agent for the user (uses deafult user)
-    # klini start - Creats a Brand new session in the specified 
     # klini sessions - To view the titles of all past sessions
     # klini sessions -- {session name} -  To resume that specific session that they have entered
     # klini profile -  To view the Clinical Profile of the user that the agent has made or they themselves itself has made
@@ -123,3 +122,192 @@ def register() -> None:
     console.print()
 
     # Check if User is Already Registered
+    config_path = Path(USER_CONFIG)
+    if config_path.exists():
+        with open(config_path, "rb") as f:
+            import tomllib
+            existing = tomllib.load(f)
+        if existing.get("user", {}).get("active_user", ""):
+            console.print("[yellow]You are already registered.[/yellow]")
+            console.print("Use [bold cyan]klini config set[/bold cyan] to update individual values.")
+            console.print()
+            raise typer.Exit(0)
+        
+    # Start Registration of Personal Info
+    console.print(f"    [bold] Personal Information [/]")
+
+    # Name
+    while True:
+        name = console.input(f"    Name: ").strip()
+        if name.isalpha():
+            break
+        else:
+            console.print("  [red]Name cannot be empty.[/]")
+
+    # Age
+    while True:
+        age = console.input(f"  Age: ").strip()
+        if age > 0 and age.isdigit():
+            age = int(age)
+            break
+        else:
+            console.print("  [red]Please enter a valid age That is atleast greater than 0.[/]")
+
+    # Sex
+    while True:
+        sex = console.input(f"  Sex or Gender(can be 'male', 'female' or 'other'): ")
+        if sex in ['male', 'female', 'other']:
+            break
+        else:
+            console.print("  [red]Please enter male, female, or other.[/]")
+
+    console.print()
+
+    # Configuration Inputs
+    console.print(f"    [bold] Agent Configuration [/]")
+    console.print()
+
+    # Email
+    console.print(f" Your Email is required to Create a free Pubmedical Account for an API")
+    while True:
+        email = console.input(f"    Email: ")
+        if email and '@' in email:
+            break
+        else:
+            console.print("  [red]Please enter a valid email address.[/red]")
+
+    # Infermedica
+    console.print("  Infermedica provides clinical symptom classification (free tier).")
+    console.print("  Get your free credentials at [link=https://developer.infermedica.com]https://developer.infermedica.com[/]!")
+    console.print()
+    while True:
+        infermedica_id = console.input("  Infermedica App ID (optional): ").strip()
+        infermedica_key = console.input("  Infermedica App Key (optional): ").strip()
+        if infermedica_id and infermedica_key:
+            break
+        else:
+            console.print(f"    [red] Please enter a Valid Infermedica ID and Key [/]")
+        
+    # Providers
+    console.print("  Providers:")
+    console.print("    [cyan]1[/] ollama     (local, no API key needed)")
+    console.print("    [cyan]2[/] openrouter (cloud, API key required)")
+    console.print()
+    while True:
+        provider_input = console.input("  Choose provider (1 or 2): ").strip()
+        if provider_input == "1":
+            provider = "ollama"
+            break
+        elif provider_input == "2":
+            provider = "openrouter"
+            break
+        else:
+            console.print("  [red]Please enter 1 or 2.[/]")
+            console.print()
+
+    console.print()
+
+    # Model
+    if provider == "ollama":
+        console.print("  Recommended Ollama models:")
+        console.print("    [cyan]phi3:mini[/]      3.8B — fast on CPU, good reasoning")
+        console.print("    [cyan]gemma2:2b[/]      2B   — very fast, decent quality")
+        console.print("    [cyan]mistral:7b-q4[/]  7B   — strong reasoning, slower on CPU")
+        console.print()
+        while True:
+            model = console.input("  Model name: ").strip()
+            if model:
+                break
+            else:
+                console.print("  [red]Model name cannot be empty.[/]")
+    elif provider == 'openrouter':
+        # API Key
+        console.print("  Get your free API key at [link=https://openrouter.ai]https://openrouter.ai[/]")
+        console.print()
+        while True:
+            api_key = console.input("  OpenRouter API key: ").strip()
+            if api_key:
+                break
+            console.print("  [red]API key cannot be empty for OpenRouter.[/red]")
+        console.print()
+
+        console.print("  Recommended OpenRouter free models:")
+        console.print("    [cyan]meta-llama/llama-3.1-8b-instruct:free[/]")
+        console.print("    [cyan]microsoft/phi-3-mini-128k-instruct:free[/]")
+        console.print("    [cyan]mistralai/mistral-7b-instruct:free[/]")
+        console.print("    [cyan]deepseek/deepseek-r1:free[/]")
+        console.print()
+        while True:
+            model = console.input("  Model name: ").strip()
+            if model:
+                break
+            console.print("  [red]Model name cannot be empty.[/]")
+
+    console.print()
+
+    console.print("  The gatekeeper is a separate model that validates each step.")
+    console.print("  It can be the same as your main model or a smaller faster one.")
+    console.print()
+    gatekeeper_input = console.input(f"  Gatekeeper model (press enter to use {model}): ").strip()
+    if gatekeeper_input:
+        gatekeeper = gatekeeper_input
+    else:
+        gatekeeper = model
+
+    console.print()
+
+    # Update Config
+
+    updated_config = {
+        "config": {
+            "provider": provider,
+            "model": model,
+            "gatekeeper": gatekeeper,
+            "openrouter_api_key": api_key,
+            "email": email,
+            "infermedica_app_id": infermedica_id,
+            "infermedica_app_key": infermedica_key,
+        },
+        "user": {
+            "active_user": name.lower().replace(" ", "_"),
+        }
+    }
+
+    with open(config_path, "wb") as f:
+        tomli_w.dump(updated_config, f)
+
+    # Create User's and USER.md
+    user_id = name.lower().replace(" ", "_")
+    profile_dir = Path(USERS) / user_id
+    profile_dir.mkdir(parents=True, exist_ok=True)
+
+    profile_path = profile_dir / "USER.md"
+    profile_path.write_text(
+        f"# Patient Profile — {name}\n\n"
+        f"## Personal Information\n"
+        f"Name: {name}\n"
+        f"Age: {age}\n"
+        f"Sex: {sex}\n\n"
+        f"## Medical History\n\n"
+        f"## Current Medications\n\n"
+        f"## Allergies\n\n"
+        f"## Family History\n\n"
+        f"## Lifestyle\n"
+    )
+
+    # Registration Complete
+
+    console.print(Panel(
+        f"[bold green]Registration complete.[/]\n\n"
+        f"  Name:      {name}\n"
+        f"  Age:       {age}\n"
+        f"  Sex:       {sex}\n"
+        f"  Provider:  {provider}\n"
+        f"  Model:     {model}\n"
+        f"  Profile:   {profile_path}",
+        expand=False
+    ))
+    console.print()
+    console.print("Run [bold cyan]klini start[/] to begin your first ever session!")
+    console.print()
+
