@@ -4,8 +4,7 @@
     # -- Diagnosis
 # Imported Libraries
 
-from agent.config import CHROMA, SKILLS, USERS, INDEX, MEMORY, HISTORY, USER_CONFIG
-import typer
+from agent.config import CHROMA, SKILLS, USERS, INDEX, MEMORY, HISTORY, USER_CONFIG, PROVIDER, AGENT, GATEKEEPER, OPENROUTER_API_KEY, EMAIL, AGE, SEX, INFERMEDICA_APP_ID ,INFERMEDICA_APP_KEY, ACTIVE_USER
 from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
@@ -16,7 +15,7 @@ from agent.main.router import get_agent
 from agent.main.state import AgentState
 from agent.utils import generate_id
 from agent.steps.prompts import CONVERSATION_PROMPT
-import tomli_w
+import tomli_w, tomllib, typer
 
 # Register The App and Console
 
@@ -40,7 +39,6 @@ console = Console()
     # klini config set {config name} {change} -- To change the value of the specific config to thee value the user gave
     # klini delete user --{username} - Deletes a user profile and all associated data.
     # klini delete skill --{skill_name} - Deletes a specific skill file if the agent learned something incorrect.
-    # klini status - Shows a quick overview of the current state of the agent.
 
 # The Initialization function
 
@@ -311,3 +309,23 @@ def register() -> None:
     console.print("Run [bold cyan]klini start[/] to begin your first ever session!")
     console.print()
 
+# The klini config function
+
+@app.command()
+def config() -> None:
+    console.print()
+    console.print(f"    [bold]Your Current Configuration Setting [/]")
+    console.print()
+    console.print(Panel(
+        f"  Current User: {ACTIVE_USER}\n"
+        f"  Age of User: {AGE}\n"
+        f"  User's Sex / Gender: {SEX}\n"
+        f"  Model Provider: {PROVIDER}\n"
+        f"  Agent Model: {AGENT}\n"
+        f"  Gatekeeper Model: {GATEKEEPER}\n"
+        f"  User's Email: {EMAIL}\n"
+        f"  API Key if Provider is OpenRouter: {OPENROUTER_API_KEY}\n"
+        f"  Infermedica ID: {INFERMEDICA_APP_ID}\n"
+        f"  Infermedica API Key: {INFERMEDICA_APP_KEY}\n",
+        expand=False
+    ))

@@ -48,11 +48,11 @@ MAX_RETRIES = 3
 # User Info
 
 EMAIL = _cfg.get("email", "")
-AGE = _usr.get("age", "")
-SEX = _usr.get("sex", "")
 INFERMEDICA_APP_ID = _cfg.get("infermedica_app_id", "")
 INFERMEDICA_APP_KEY = _cfg.get("infermedica_app_key", "")
 PARSE_URL = "https://api.infermedica.com/v3/parse"
 DIAGNOSIS_URL = "https://api.infermedica.com/v3/diagnosis"
-ACTIVE_USER = _usr.get("active_user", "default")
+ACTIVE_USER = _usr.get("active_user", "")
+AGE = _usr.get("age", "")
+SEX = _usr.get("sex", "")
 
