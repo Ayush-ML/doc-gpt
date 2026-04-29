@@ -15,7 +15,7 @@ from agent.main.router import get_agent
 from agent.main.state import AgentState
 from agent.utils import generate_id
 from agent.steps.prompts import CONVERSATION_PROMPT
-import tomli_w, typer, json
+import tomli_w, typer, json, tomllib
 
 # Register The App and Console
 
@@ -25,20 +25,20 @@ console = Console()
 # These are the commands that the user can run to interact with the App
 # The Commands help for the easy navigation of the User
 # The Following Commands have been Made or are planned :
-        # klini init - Initializes All Directories
-        # klini register - The user can input their own info such as API Key's, Email, basic Clinical Data etc
-    # klini start - Creates a Brand New session with the agent for the user (uses deafult user)
-    # klini sessions - To view the titles of all past sessions
-    # klini sessions --{session name} -  To resume that specific session that they have entered
-        # klini profile -  To view the Clinical Profile of the user that the agent has made or they themselves itself has made
-        # klini skills - To view the titles and a brief summary of all skills
-    # klini skills --{skill name} - To view the entire content of the skill name that is specified
-        # klini users - To view the list of created users
-    # klini users --{user name} - To switch to the specified user name, further actions will be carried out in this user
-        # klini config - Shows All the registered data of the user
-    # klini config set {config name} {change} -- To change the value of the specific config to thee value the user gave
-    # klini delete user --{username} - Deletes a user profile and all associated data.
-    # klini delete skill --{skill_name} - Deletes a specific skill file if the agent learned something incorrect.
+    # klini init - Initializes All Directories
+    # klini register - The user can input their own info such as API Key's, Email, basic Clinical Data etc
+        # klini start - Creates a Brand New session with the agent for the user (uses deafult user)
+        # klini sessions - To view the titles of all past sessions
+        # klini sessions {session name} -  To resume that specific session that they have entered
+    # klini profile -  To view the Clinical Profile of the user that the agent has made or they themselves itself has made
+    # klini skills - To view the titles and a brief summary of all skills
+        # klini skills {skill name} - To view the entire content of the skill name that is specified
+    # klini users - To view the list of created users
+        # klini users {user name} - To switch to the specified user name, further actions will be carried out in this user
+    # klini config - Shows All the registered data of the user
+        # klini config set {config name} {change} -- To change the value of the specific config to thee value the user gave
+        # klini delete user {username} - Deletes a user profile and all associated data.
+        # klini delete skill {skill_name} - Deletes a specific skill file if the agent learned something incorrect.
 
 # The Initialization function
 
@@ -119,17 +119,22 @@ def register() -> None:
     console.print(Panel("[bold]Klini Registration[/bold]", expand=False))
     console.print()
 
-    # Check if User is Already Registered
     config_path = Path(USER_CONFIG)
+
+    # Check if Initialization is done
+    if not config_path.exists():
+        console.print("[red]Please initialize the agent first using [bold cyan]klini init[/bold cyan].[/red]")
+        return None
+
+    # Check if User is Already Registered
     if config_path.exists():
         with open(config_path, "rb") as f:
-            import tomllib
             existing = tomllib.load(f)
         if existing.get("user", {}).get("active_user", ""):
             console.print("[yellow]You are already registered.[/yellow]")
             console.print("Use [bold cyan]klini config set[/bold cyan] to update individual values.")
             console.print()
-            raise typer.Exit(0)
+            return None
         
     # Start Registration of Personal Info
     console.print(f"    [bold] Personal Information [/]")
@@ -145,9 +150,10 @@ def register() -> None:
     # Age
     while True:
         age = console.input(f"  Age: ").strip()
-        if age > 0 and age.isdigit():
+        if age.isdigit():
             age = int(age)
-            break
+            if age > 0:
+                break
         else:
             console.print("  [red]Please enter a valid age That is atleast greater than 0.[/]")
 
@@ -261,7 +267,7 @@ def register() -> None:
             "provider": provider,
             "model": model,
             "gatekeeper": gatekeeper,
-            "openrouter_api_key": api_key,
+            "openrouter_api_key": api_key if provider == "openrouter" else "",
             "email": email,
             "infermedica_app_id": infermedica_id,
             "infermedica_app_key": infermedica_key,
@@ -334,27 +340,37 @@ def config() -> None:
 # The Function to view all skills and summaries of the skills
 
 @app.command()
-def skills() -> None:
-    console.print(f"    [bold]Agent Skills[/]")
-    console.print()
-    index_path = Path(INDEX)
-    if not index_path.exists():
-        console.print("[red]The Skills index file does not exsist, please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
-        return None
-    index_data = []
-    with open(index_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            index_data.append(json.loads(line))
-    if not index_data:
-        console.print("[red]No skills found. Start a session with [bold cyan]klini start[/] to let the agent learn new skills![/]")
-        return None
-    skills = [item['title'] for item in index_data]
-    summaries = [item['summary'] for item in index_data]
-
-    for skill, summary in zip(skills, summaries):
-        console.print(f"  [cyan]→ {skill}[/]")
-        console.print(f"  [white]→ {summary}[/]")
+def skills(skill_name = typer.Argument(None)) -> None:
+    if skill_name is None:
+        console.print(f"    [bold]Agent Skills[/]")
         console.print()
+        index_path = Path(INDEX)
+        if not index_path.exists():
+            console.print("[red]The Skills index file does not exsist, please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
+            return None
+        index_data = []
+        with open(index_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                index_data.append(json.loads(line))
+        if not index_data:
+            console.print("[red]No skills found. Start a session with [bold cyan]klini start[/] to let the agent learn new skills![/]")
+            return None
+        skills = [item['title'] for item in index_data]
+        summaries = [item['summary'] for item in index_data]
+
+        for skill, summary in zip(skills, summaries):
+            console.print(f"  [cyan]→ {skill}[/]")
+            console.print(f"  [white]→ {summary}[/]")
+            console.print()
+            return None
+    else:
+        skill_path = Path(SKILLS) / f"{skill_name}.md"
+        if not skill_path.exists():
+            console.print(f"[red]Skill '{skill_name}' not found.[/]")
+            return None
+        else:
+            skill_content = skill_path.read_text(encoding='utf-8')
+            console.print(Markdown(skill_content))
 
 # The Function to view the Clinical Profile of the user that the agent has made or they themselves itself has made
 
