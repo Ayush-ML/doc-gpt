@@ -15,7 +15,7 @@ from agent.main.router import get_agent
 from agent.main.state import AgentState
 from agent.utils import generate_id
 from agent.steps.prompts import CONVERSATION_PROMPT
-import tomli_w, typer, json, tomllib
+import tomli_w, typer, json, tomllib, shutil
 
 # Register The App and Console
 
@@ -32,13 +32,15 @@ console = Console()
         # klini sessions {session name} -  To resume that specific session that they have entered
     # klini profile -  To view the Clinical Profile of the user that the agent has made or they themselves itself has made
     # klini skills - To view the titles and a brief summary of all skills
-        # klini skills {skill name} - To view the entire content of the skill name that is specified
+    # klini skills {skill name} - To view the entire content of the skill name that is specified
     # klini users - To view the list of created users
-        # klini users {user name} - To switch to the specified user name, further actions will be carried out in this user
+        # klini set users {user name} - To switch to the specified user name, further actions will be carried out in this user
     # klini config - Shows All the registered data of the user
-        # klini config set {config name} {change} -- To change the value of the specific config to thee value the user gave
-        # klini delete user {username} - Deletes a user profile and all associated data.
-        # klini delete skill {skill_name} - Deletes a specific skill file if the agent learned something incorrect.
+        # klini set config {config name} {change} -- To change the value of the specific config to thee value the user gave
+    # klini delete user {username} - Deletes a user profile and all associated data.
+    # klini delete skill {skill_name} - Deletes a specific skill file if the agent learned something incorrect.
+        # klini delete session {session_name} - Deletes a specific session and all associated data if the user wants to clear up space or remove old sessions.
+    # klini delete all - Deletes all data i mean all data related to klini inlcuding users, sessions, skills, configs everything and resets the agent to a fresh state, have to initialize and set up all again. Use with caution.
 
 # The Initialization function
 
@@ -405,3 +407,122 @@ def users() -> None:
         return None
     for user_dir in user_dirs:
         console.print(f"  [cyan]→ {user_dir.name}[/]")
+
+# The Function for Deletion
+
+@app.command()
+def delete(mode: str = typer.Argument('all'), name: str = typer.Argument(None)) -> None:
+    if mode == "user":
+        if not name:
+            console.print("[red]Please specify the username to delete using [bold cyan]klini delete user {username}[/]")
+            return None
+        else:
+            user_path = Path(USERS) / name
+            if not user_path.exists():
+                console.print(f"[red]User '{name}' not found.[/]")
+                return None
+            else:
+                console.print(f" Are You absolutely sure you want to delete user '{name}' and all associated data? This action cannot be undone.")
+                confirmation = console.input(f" y/n: ").strip().lower()
+                if confirmation != "y":
+                    console.print("[yellow]Deletion cancelled.[/]")
+                    return None
+                else:
+                    try:
+                        shutil.rmtree(user_path)
+                    except Exception as e:
+                        console.print(f"[red]An error occurred while deleting user '{name}': {e}[/]")
+                        return None
+                    console.print(f"[green]User '{name}' and all associated data deleted successfully.[/]")
+
+    elif mode == "skill":
+        if not name:
+            console.print("[red]Please specify the skill name to delete using [bold cyan]klini delete skill skill_name[/][/]")
+            return None
+        skill_path = Path(SKILLS) / f"{name}.md"
+        if not skill_path.exists():
+            console.print(f"[red]Skill '{name}' not found.[/]")
+            return None
+        else:
+            console.print(f" Are You absolutely sure you want to delete skill '{name}'? This action cannot be undone.")
+            confirmation = console.input(f" y/n: ").strip().lower()
+            if confirmation != "y":
+                console.print("[yellow]Deletion cancelled.[/]")
+                return None
+            else:
+                skill_path.unlink()
+                console.print(f"[green]Skill '{name}' deleted successfully.[/]")
+
+    elif mode == "session":
+        pass
+
+    elif mode == "all":
+        console.print(f" Are You absolutely sure you want to delete all data related to Klini including users, sessions, skills, configs everything and reset the agent to a fresh state? This action CANNOT be undone.")
+        confirmation = console.input(f" y/n: ").strip().lower()
+        if confirmation != "y":
+            console.print("[yellow]Deletion cancelled.[/]")
+            return None
+        else:
+            # Delete Users
+            users_path = Path(USERS)
+            if users_path.exists():
+                try:
+                    shutil.rmtree(users_path)
+                except Exception as e:
+                    console.print(f"[red]An error occurred while deleting users: {e}[/]")
+                    return None
+                console.print(f"[green]All users and associated data deleted successfully.[/]")
+            else:
+                console.print(f"[yellow]→ Users directory not found, skipping.[/]")
+
+            # Delete Skills
+            skills_path = Path(SKILLS)
+            if skills_path.exists():
+                try:
+                    shutil.rmtree(skills_path)
+                except Exception as e:
+                    console.print(f"[red]An error occurred while deleting skills: {e}[/]")
+                    return None
+                console.print(f"[green]All skills deleted successfully.[/]")
+            else:
+                console.print(f"[yellow]→ Skills directory not found, skipping.[/]")
+
+            # Delete Memory
+            memory_path = Path(MEMORY)
+            if memory_path.exists():
+                try:
+                    shutil.rmtree(memory_path)
+                except Exception as e:
+                    console.print(f"[red]An error occurred while deleting memory: {e}[/]")
+                    return None
+                console.print(f"[green]All memory deleted successfully.[/]")
+            else:
+                console.print(f"[yellow]→ Memory directory not found, skipping.[/]")
+
+            # Delete Chroma
+            chroma_path = Path(CHROMA)
+            if chroma_path.exists():
+                try:
+                    shutil.rmtree(chroma_path)
+                except Exception as e:
+                    console.print(f"[red]An error occurred while deleting chroma: {e}[/]")
+                    return None
+                console.print(f"[green]All chroma data deleted successfully.[/]")
+            else:
+                console.print(f"[yellow]→ Chroma directory not found, skipping.[/]")
+
+            # Delete Config
+            config_path = Path(USER_CONFIG)
+            if config_path.exists():
+                try:
+                    config_path.unlink()
+                except Exception as e:
+                    console.print(f"[red]An error occurred while deleting user config: {e}[/]")
+                    return None
+                console.print(f"[green]User config deleted successfully.[/]")
+            else:
+                console.print(f"[yellow]→ User config file not found, skipping.[/]")
+            
+            console.print(f"[bold green]All data deleted and agent reset to fresh state. Please run [bold cyan]klini init[/] to initialize and then [bold cyan]klini register[/] to set up your account.")
+    else:
+        console.print("[red]Invalid mode. Please choose from: user, skill, session, all.[/]")
