@@ -69,7 +69,7 @@ def run(state: AgentState) -> dict:
         # Append the title and Summary to skill index
 
         with open(INDEX, "a") as file:
-            file.write(json.dumps({title: summary}) + "\n")
+            file.write(json.dumps({"title": title, "summary": summary}) + "\n")
 
     # Write Memory to ChromaDB
     if not session_exists(session_id=session_id):

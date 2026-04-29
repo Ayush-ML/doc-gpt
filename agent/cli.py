@@ -15,7 +15,7 @@ from agent.main.router import get_agent
 from agent.main.state import AgentState
 from agent.utils import generate_id
 from agent.steps.prompts import CONVERSATION_PROMPT
-import tomli_w, tomllib, typer
+import tomli_w, typer, json
 
 # Register The App and Console
 
@@ -25,17 +25,17 @@ console = Console()
 # These are the commands that the user can run to interact with the App
 # The Commands help for the easy navigation of the User
 # The Following Commands have been Made or are planned :
-    # klini init - Initializes All Directories
-    # klini register - The user can input their own info such as API Key's, Email, basic Clinical Data etc
+        # klini init - Initializes All Directories
+        # klini register - The user can input their own info such as API Key's, Email, basic Clinical Data etc
     # klini start - Creates a Brand New session with the agent for the user (uses deafult user)
     # klini sessions - To view the titles of all past sessions
-    # klini sessions -- {session name} -  To resume that specific session that they have entered
-    # klini profile -  To view the Clinical Profile of the user that the agent has made or they themselves itself has made
-    # klini skills - To view the titles and a brief summary of all skills
-    # klini skills -- {skill name} - To view the entire content of the skill name that is specified
-    # klini users - To view the list of created users
-    # klini users -- {user name} - To switch to the specified user name, further actions will be carried out in this user
-    # klini config - Shows All the registered data of the user
+    # klini sessions --{session name} -  To resume that specific session that they have entered
+        # klini profile -  To view the Clinical Profile of the user that the agent has made or they themselves itself has made
+        # klini skills - To view the titles and a brief summary of all skills
+    # klini skills --{skill name} - To view the entire content of the skill name that is specified
+        # klini users - To view the list of created users
+    # klini users --{user name} - To switch to the specified user name, further actions will be carried out in this user
+        # klini config - Shows All the registered data of the user
     # klini config set {config name} {change} -- To change the value of the specific config to thee value the user gave
     # klini delete user --{username} - Deletes a user profile and all associated data.
     # klini delete skill --{skill_name} - Deletes a specific skill file if the agent learned something incorrect.
@@ -309,11 +309,10 @@ def register() -> None:
     console.print("Run [bold cyan]klini start[/] to begin your first ever session!")
     console.print()
 
-# The klini config function
+# The Configuration Function to view all the registered data of the user and the agent
 
 @app.command()
 def config() -> None:
-    console.print()
     console.print(f"    [bold]Your Current Configuration Setting [/]")
     console.print()
     console.print(Panel(
@@ -329,3 +328,64 @@ def config() -> None:
         f"  Infermedica API Key: {INFERMEDICA_APP_KEY}\n",
         expand=False
     ))
+    console.print(" To change any of these settings, use [bold cyan]klini config set {config name} {new value}[/]")
+    console.print()
+
+# The Function to view all skills and summaries of the skills
+
+@app.command()
+def skills() -> None:
+    console.print(f"    [bold]Agent Skills[/]")
+    console.print()
+    index_path = Path(INDEX)
+    if not index_path.exists():
+        console.print("[red]The Skills index file does not exsist, please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
+        return None
+    index_data = []
+    with open(index_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            index_data.append(json.loads(line))
+    if not index_data:
+        console.print("[red]No skills found. Start a session with [bold cyan]klini start[/] to let the agent learn new skills![/]")
+        return None
+    skills = [item['title'] for item in index_data]
+    summaries = [item['summary'] for item in index_data]
+
+    for skill, summary in zip(skills, summaries):
+        console.print(f"  [cyan]→ {skill}[/]")
+        console.print(f"  [white]→ {summary}[/]")
+        console.print()
+
+# The Function to view the Clinical Profile of the user that the agent has made or they themselves itself has made
+
+@app.command()
+def profile() -> None:
+    console.print(f"    [bold]Patient Clinical Profile[/]")
+    console.print()
+    active_user = ACTIVE_USER
+    if not active_user:
+        console.print("[red]No active user found. Please run [bold cyan]klini register[/] to set up your profile.[/]")
+        return None
+    profile_path = Path(USERS) / active_user / "USER.md"
+    if not profile_path.exists():
+        console.print("[red]Profile file not found. Please run [bold cyan]klini register[/] to set up your profile.[/]")
+        return None
+    profile_content = profile_path.read_text(encoding='utf-8')
+    console.print(Markdown(profile_content))
+
+# Function to view all created users
+
+@app.command()
+def users() -> None:
+    console.print(f"    [bold]Registered Users[/]")
+    console.print()
+    users_path = Path(USERS)
+    if not users_path.exists():
+        console.print("[red]Users directory not found. Please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
+        return None
+    user_dirs = [d for d in users_path.iterdir() if d.is_dir()]
+    if not user_dirs:
+        console.print("[red]No users found. Please run [bold cyan]klini register[/] to create a user profile![/]")
+        return None
+    for user_dir in user_dirs:
+        console.print(f"  [cyan]→ {user_dir.name}[/]")
