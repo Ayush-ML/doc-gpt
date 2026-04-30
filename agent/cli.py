@@ -14,8 +14,9 @@ from agent.main.graph import get_graph
 from agent.main.router import get_agent
 from agent.main.state import AgentState
 from agent.utils import generate_id
-from agent.steps.prompts import CONVERSATION_PROMPT
+from agent.steps.prompts import CONVERSATION_PROMPT, SESSION_TITLE_PROMPT
 import tomli_w, typer, json, tomllib, shutil
+from datetime import datetime
 
 # Register The App and Console
 
@@ -27,9 +28,9 @@ console = Console()
 # The Following Commands have been Made or are planned :
     # klini init - Initializes All Directories
     # klini register - The user can input their own info such as API Key's, Email, basic Clinical Data etc
-        # klini start - Creates a Brand New session with the agent for the user (uses deafult user)
-        # klini sessions - To view the titles of all past sessions
-        # klini sessions {session name} -  To resume that specific session that they have entered
+    # klini start - Creates a Brand New session with the agent for the user (uses deafult user)
+    # klini sessions - To view the titles of all past sessions
+    # klini sessions {session name} -  To resume that specific session that they have entered
     # klini profile -  To view the Clinical Profile of the user that the agent has made or they themselves itself has made
     # klini skills - To view the titles and a brief summary of all skills
     # klini skills {skill name} - To view the entire content of the skill name that is specified
@@ -39,7 +40,7 @@ console = Console()
         # klini set config {config name} {change} -- To change the value of the specific config to thee value the user gave
     # klini delete user {username} - Deletes a user profile and all associated data.
     # klini delete skill {skill_name} - Deletes a specific skill file if the agent learned something incorrect.
-        # klini delete session {session_name} - Deletes a specific session and all associated data if the user wants to clear up space or remove old sessions.
+    # klini delete session {session_name} - Deletes a specific session and all associated data if the user wants to clear up space or remove old sessions.
     # klini delete all - Deletes all data i mean all data related to klini inlcuding users, sessions, skills, configs everything and resets the agent to a fresh state, have to initialize and set up all again. Use with caution.
 
 # The Initialization function
@@ -602,10 +603,45 @@ def _run_session(initial_state: AgentState) -> None:
                 console.print(f"[green]Klini:[/] {response}")
 
             elif state['diagnosis_started']:
-                console.print("[green] Starting Diagnosis Phase... (This may take some time)[/]")
-                result = graph.invoke(state)
+                with console.status("[green]Klini is diagnosing...[/]"):
+                    result = graph.invoke(state)
+                console.print(f"[green]Klini[/] Diagnosis complete.")
                 state = result
                 last_message = state['messages'][-1].content
+                console.print(f"[green]Klini:[/] {last_message}")
+                state['diagnosis_started'] = False
+                state['ever_diagnosed'] = True
+        except KeyboardInterrupt:
+            console.print()
+            console.print("[yellow]Session ended by user.[/]")
+            if state['messages']:
+                with console.status("[green]Saving session...[/]"):
+                    history_path = Path(HISTORY)
+                    if history_path.exists():
+                        with open(history_path, "r") as file:
+                            history = json.load(file)
+                    else:
+                        history = []
+                    session_text = "\n".join([
+                    f"{'User' if isinstance(m, HumanMessage) else 'Agent'}: {m.content}"
+                    for m in state['messages']
+                    ])
+                    context = [
+                        {"role": "system", "content": SESSION_TITLE_PROMPT},
+                        {"role": "user", "content": session_text}
+                    ]
+                    session_title = (agent.invoke(context)).content
+                    history.append({
+                        "session_title": session_title,
+                        "time": datetime.now(),
+                        "session_id": state['session_id'],
+                        "messages": [{"role": m.type, "content": m.content} for m in state['messages']]
+                    })
+                    with open(history_path, "w") as file:
+                        json.dump(history, file, indent=4)
+
+                console.print(f"[green]Session saved with title: {session_title}[/]")
+            return None
 
 # Create The Sessions Command to view all sessions or resume a specific session
 
@@ -627,7 +663,7 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
         console.print()
         count = 1
         for session in history:
-            console.print(f"    {count}. [cyan] {session['title']}[/]")
+            console.print(f"    {count}. [cyan] {session['session_title']}[/]")
             count += 1
         console.print()
         console.print("To resume a session, run [bold cyan]klini sessions {session name}[/]")
@@ -636,7 +672,7 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
     if session_title:
         for session in history:
             if session['session_title'].lower() == session_title.lower():
-                console.print(f"Resuming session: [cyan]{session['title']}[/]")
+                console.print(f"Resuming session: [cyan]{session['session_title']}[/]")
                 console.print()
                 session_data = session
 
@@ -647,8 +683,17 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                         console.print(f"[blue]{role}:[/] {content}")
                     else:
                         console.print(f"[green]{role}:[/] {content}")
-               
-                return None
+        if not session_data:
+            console.print(f"[red]Session '{session_title}' not found.[/]")
+            return None
+        else:
+            with open(f"agent\users\{ACTIVE_USER}\USER.md", "r") as file: # Load Clinical Profile
+                clinical_profile = file.read()
+            state = AgentState(session_id=session_data['session_id'],
+                                user_id=ACTIVE_USER,
+                                messages=[HumanMessage(content=m['content']) if m['role'] == 'user' else AIMessage(content=m['content']) for m in session_data['messages']],
+                                clinical_profile=clinical_profile)
+            _run_session(initial_state=state)
             
 # The Function to start a new session with the agent for the user
 
@@ -657,30 +702,9 @@ def start() -> None:
     console.print(f"    [bold]Starting New Session with Klini Agent[/]")
     console.print()
 
-    # Create The Agent State
-
-    state = AgentState()
-
-    # Load Necessary data into AgentState
-
-    clinical_profile = Path(USERS) / ACTIVE_USER / "USER.md"
-    if not clinical_profile.exists():
-        console.print("[red]Clinical profile not found. Please run [bold cyan]klini register[/] to set up your profile.[/]")
-        return None
-    state['clinical_profile'] = clinical_profile.read_text(encoding='utf-8')
-
-    state['messages'] = []
-    
-    index_path = Path(INDEX)
-    if index_path.exists():
-        all_skills = []
-        with open(index_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                skill_data = json.loads(line)
-                all_skills.append(f"{skill_data['title']}: {skill_data['summary']}")
-        state['all_skills'] = "\n".join(all_skills)
-    else:
-        state['all_skills'] = "No skills found."
-
     session_id = generate_id()
-    state['session_id'] = session_id
+    with open(f"agent\users\{ACTIVE_USER}\USER.md", "r") as file: # Load Clinical Profile
+        clinical_profile = file.read()
+
+    state = AgentState(session_id=session_id, user_id=ACTIVE_USER, clinical_profile=clinical_profile)
+    _run_session(initial_state=state)

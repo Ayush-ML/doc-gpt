@@ -51,3 +51,4 @@ class AgentState(TypedDict):
     # Control Flags
 
     diagnosis_started: bool
+    ever_diagnosed: bool

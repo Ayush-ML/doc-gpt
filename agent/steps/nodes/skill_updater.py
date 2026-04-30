@@ -34,7 +34,6 @@ def run(state: AgentState) -> dict:
     clinical_profile = state['clinical_profile']
     messages = state['messages']
     all_skills = state['all_skills']
-    session_id = state['session_id']
 
     # Create The Agent
 
@@ -71,34 +70,6 @@ def run(state: AgentState) -> dict:
 
         with open(INDEX, "a") as file:
             file.write(json.dumps({"title": title, "summary": summary}) + "\n")
-
-    # Use The Agent to Create a Session Title based on the current session
-    context = [
-        {"role": "system", "content": SESSION_TITLE_PROMPT},
-        {"role": "user", "content": session_text}
-    ]
-    session_title = (agent.invoke(context)).content
-
-    # Write Memory to ChromaDB
-    if not session_exists(session_id=session_id):
-        write_memory(session_id=session_id, messages=messages, session_title=session_title)
-
-    # Write Memory to JSON History
-    history_entry = {
-    "session_id": session_id,
-    "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
-    "session_title": session_title,
-    "messages": [
-            {
-            "role": "user" if isinstance(m, HumanMessage) else "agent",
-            "content": m.content
-        }
-        for m in messages
-    ]
-}
-
-    with open(HISTORY, "a") as file:
-        file.write(json.dumps(history_entry) + "\n")
 
     return {}
         
