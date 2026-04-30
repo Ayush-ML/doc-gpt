@@ -47,3 +47,7 @@ class AgentState(TypedDict):
 
     gatekeeper_decision: bool
     gatekeeper_reason: str
+
+    # Control Flags
+
+    diagnosis_started: bool

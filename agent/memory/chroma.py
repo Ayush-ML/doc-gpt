@@ -22,7 +22,7 @@ def _get_chroma() -> chromadb.Collection:
 
 # Create a Function that writes The Session upon end to ChormaDb
 
-def write_memory(session_id: str, messages: list[dict]) -> None:
+def write_memory(session_id: str, messages: list[dict], session_title: str) -> None:
      valid_messages = [m for m in messages if m.content.strip()]
      if not valid_messages:
         return
@@ -33,6 +33,7 @@ def write_memory(session_id: str, messages: list[dict]) -> None:
      metadatas = [
         {
             "session_id": session_id,
+            "session_title": session_title,
             "role": "user" if isinstance(m, HumanMessage) else "agent",
             "index": i,
             "time": datetime.now()

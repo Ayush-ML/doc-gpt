@@ -6,11 +6,12 @@
 import json
 from pathlib import Path
 from agent.main.state import AgentState
-from agent.config import SKILLS, INDEX
+from agent.config import SKILLS, INDEX, HISTORY
 from agent.main.router import get_agent
-from agent.steps.prompts import SKILL_WRITER_PROMPT
+from agent.steps.prompts import SKILL_WRITER_PROMPT, SESSION_TITLE_PROMPT
 from agent.memory.chroma import write_memory, session_exists
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage
+from datetime import datetime
 
 # Create A function that will parse the models response and convert to json
 
@@ -71,9 +72,33 @@ def run(state: AgentState) -> dict:
         with open(INDEX, "a") as file:
             file.write(json.dumps({"title": title, "summary": summary}) + "\n")
 
+    # Use The Agent to Create a Session Title based on the current session
+    context = [
+        {"role": "system", "content": SESSION_TITLE_PROMPT},
+        {"role": "user", "content": session_text}
+    ]
+    session_title = (agent.invoke(context)).content
+
     # Write Memory to ChromaDB
     if not session_exists(session_id=session_id):
-        write_memory(session_id=session_id, messages=messages)
+        write_memory(session_id=session_id, messages=messages, session_title=session_title)
+
+    # Write Memory to JSON History
+    history_entry = {
+    "session_id": session_id,
+    "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
+    "session_title": session_title,
+    "messages": [
+            {
+            "role": "user" if isinstance(m, HumanMessage) else "agent",
+            "content": m.content
+        }
+        for m in messages
+    ]
+}
+
+    with open(HISTORY, "a") as file:
+        file.write(json.dumps(history_entry) + "\n")
 
     return {}
         

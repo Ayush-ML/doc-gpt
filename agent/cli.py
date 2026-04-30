@@ -454,7 +454,41 @@ def delete(mode: str = typer.Argument('all'), name: str = typer.Argument(None)) 
                 console.print(f"[green]Skill '{name}' deleted successfully.[/]")
 
     elif mode == "session":
-        pass
+        if not name:
+            console.print("[red]Please specify the session title to delete using [bold cyan]klini delete session session_title[/][/]")
+            return None
+        
+        history_path = Path(HISTORY)
+        if not history_path.exists():
+            console.print("[red]History file not found. Please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
+            return None
+        
+        with open(history_path, "r") as file:
+            history = json.load(file)
+        session_to_delete = None
+
+        for session in history:
+            if session['session_title'].lower() == name.lower():
+                session_to_delete = session
+                break
+
+        if not session_to_delete:
+            console.print(f"[red]Session '{name}' not found.[/]")
+            return None
+        
+        else:
+            console.print(f" Are You absolutely sure you want to delete session '{name}' and all associated data? This action cannot be undone.")
+            confirmation = console.input(f" y/n: ").strip().lower()
+            if confirmation != "y":
+                console.print("[yellow]Deletion cancelled.[/]")
+                return None
+            
+            else:
+                history.remove(session_to_delete)
+                with open(history_path, "w") as file:
+                    json.dump(history, file, indent=4)
+                console.print(f"[green]Session '{name}' and all associated data deleted successfully.[/]")
+                return None
 
     elif mode == "all":
         console.print(f" Are You absolutely sure you want to delete all data related to Klini including users, sessions, skills, configs everything and reset the agent to a fresh state? This action CANNOT be undone.")
@@ -524,5 +558,129 @@ def delete(mode: str = typer.Argument('all'), name: str = typer.Argument(None)) 
                 console.print(f"[yellow]→ User config file not found, skipping.[/]")
             
             console.print(f"[bold green]All data deleted and agent reset to fresh state. Please run [bold cyan]klini init[/] to initialize and then [bold cyan]klini register[/] to set up your account.")
+            return None
     else:
         console.print("[red]Invalid mode. Please choose from: user, skill, session, all.[/]")
+        return None
+    
+# Create A function that is used to run a session witha given state, used to resume sessions or start a brand new one
+
+def _run_session(initial_state: AgentState) -> None:
+    # Initialize Necessary Variables
+    graph = get_graph()
+    agent = get_agent()
+    state = initial_state
+
+    console.print(f"[green]Session started. Use Ctrl + C to exit.[/]")
+    console.print()
+
+    while True:
+        try:
+            user_input = console.input("[blue]You:[/] ").strip()
+            if not user_input:
+                continue
+            state['messages'].append(HumanMessage(content=user_input))
+            if not state['diagnosis_started']:
+                session_text = "\n".join([
+                f"{'User' if isinstance(m, HumanMessage) else 'Agent'}: {m.content}"
+                for m in state['messages']
+                ])
+                user_message = f"User's Clinical Profile: {state['clinical_profile']}, Current Session Messages: {session_text}"
+                context = [
+                    {"role": "system", "content": CONVERSATION_PROMPT},
+                    {"role": "user", "content": user_message}
+                ]
+                console.print("[green]Klini:[/] ", end="")
+                response = ""
+                for chunk in agent.stream(context):
+                    if "<DIAGNOSE/>" in chunk.content:
+                        state['diagnosis_started'] = True
+                        chunk.content = chunk.content.replace("<DIAGNOSE/>", "").strip()
+                    console.print(chunk.content, end="", flush=True)
+                    response += chunk.content
+                state['messages'].append(AIMessage(content=response))
+                console.print(f"[green]Klini:[/] {response}")
+
+            elif state['diagnosis_started']:
+                console.print("[green] Starting Diagnosis Phase... (This may take some time)[/]")
+                result = graph.invoke(state)
+                state = result
+                last_message = state['messages'][-1].content
+
+# Create The Sessions Command to view all sessions or resume a specific session
+
+@app.command()
+def sessions(session_title: str = typer.Argument(None)) -> None:
+    history_path = Path(HISTORY)
+    if not history_path.exists():
+        console.print("[red]History file not found. Please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
+        return None
+    else:
+        with open(history_path, "r") as file:
+            history = json.load(file)
+        if not history:
+            console.print("[red]No sessions found. Start a session with [bold cyan]klini start[/] to create sessions![/]")
+            return None
+    
+    if session_title is None:
+        console.print(f"    [bold]Your Sessions[/]")
+        console.print()
+        count = 1
+        for session in history:
+            console.print(f"    {count}. [cyan] {session['title']}[/]")
+            count += 1
+        console.print()
+        console.print("To resume a session, run [bold cyan]klini sessions {session name}[/]")
+        return None
+    
+    if session_title:
+        for session in history:
+            if session['session_title'].lower() == session_title.lower():
+                console.print(f"Resuming session: [cyan]{session['title']}[/]")
+                console.print()
+                session_data = session
+
+                for message in session['messages']:
+                    role = 'You' if message['role'] == 'user' else 'Klini'
+                    content = message['content']
+                    if role == "You":
+                        console.print(f"[blue]{role}:[/] {content}")
+                    else:
+                        console.print(f"[green]{role}:[/] {content}")
+               
+                return None
+            
+# The Function to start a new session with the agent for the user
+
+@app.command()
+def start() -> None:
+    console.print(f"    [bold]Starting New Session with Klini Agent[/]")
+    console.print()
+
+    # Create The Agent State
+
+    state = AgentState()
+
+    # Load Necessary data into AgentState
+
+    clinical_profile = Path(USERS) / ACTIVE_USER / "USER.md"
+    if not clinical_profile.exists():
+        console.print("[red]Clinical profile not found. Please run [bold cyan]klini register[/] to set up your profile.[/]")
+        return None
+    state['clinical_profile'] = clinical_profile.read_text(encoding='utf-8')
+
+    state['messages'] = []
+    
+    index_path = Path(INDEX)
+    if index_path.exists():
+        all_skills = []
+        with open(index_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                skill_data = json.loads(line)
+                all_skills.append(f"{skill_data['title']}: {skill_data['summary']}")
+        state['all_skills'] = "\n".join(all_skills)
+    else:
+        state['all_skills'] = "No skills found."
+
+    session_id = generate_id()
+    state['session_id'] = session_id
