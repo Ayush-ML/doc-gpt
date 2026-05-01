@@ -5,7 +5,8 @@
 from agent.main.state import AgentState
 from agent.main.router import get_agent
 from agent.steps.prompts import PROFILE_UPDATER_PROMPT
-from langchain_core.messages import AIMessage, HumanMessage
+from agent.config import user_profile, ACTIVE_USER
+from langchain_core.messages import HumanMessage
 
 
 def run(state: AgentState) -> dict:
@@ -30,7 +31,7 @@ def run(state: AgentState) -> dict:
     updated_profile = (agent.invoke(context)).content
 
     # write updated profile back to disk
-    profile_path = f"agent\users\{user_id}\USER.md"
+    profile_path = user_profile(ACTIVE_USER)
     with open(profile_path, "w") as file:
         file.write(updated_profile)
 

@@ -12,7 +12,7 @@ from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from agent.main.graph import get_graph
 from agent.main.router import get_agent
 from agent.main.state import AgentState
-from agent.utils import generate_id
+from agent.utils import id
 from agent.steps.prompts import CONVERSATION_PROMPT, SESSION_TITLE_PROMPT
 import tomli_w, typer, json, shutil, tomllib
 from datetime import datetime
@@ -49,10 +49,14 @@ def init() -> None:
     console.print(Panel("[bold]Initializing Klini Agent... [/]"))
     console.print()
 
+
     # Get Username
+    names = [p.name for p in USERS_DIR.iterdir() if p.is_dir()]
     while True:
         name = console.input(f" Please Enter your Username: ").strip()
-        if name.isalpha():
+        if name in names:
+            console.print(f"  [red]Username already exists. Please choose a different name.[/]")
+        if name:
             break
         else:
             console.print("  [red]Name cannot be empty.[/]")
@@ -63,6 +67,7 @@ def init() -> None:
             "active_user": name
         }
     }
+    APP_CONFIG.parent.mkdir(parents=True, exist_ok=True)
     with open(APP_CONFIG, "wb") as f:
         tomli_w.dump(config, f)
 
@@ -148,6 +153,9 @@ def register() -> None:
     # Name
     names = [p.name for p in USERS_DIR.iterdir() if p.is_dir()]
     while True:
+        if len(names) == 1:
+            name = names[0]
+            break
         name = console.input(f"    Name: ").strip()
         if name in names:
             console.print(f"  [red]Username already exists. Please choose a different name.[/]")
@@ -170,7 +178,7 @@ def register() -> None:
 
     # Sex
     while True:
-        sex = console.input(f"  Sex or Gender(can be 'male', 'female' or 'other'): ")
+        sex = console.input(f"  Sex(can be 'male', 'female' or 'other'): ")
         if sex in ['male', 'female', 'other']:
             break
         else:
@@ -196,8 +204,8 @@ def register() -> None:
     console.print("  Get your free credentials at [link=https://developer.infermedica.com]https://developer.infermedica.com[/]!")
     console.print()
     while True:
-        infermedica_id = console.input("  Infermedica App ID (optional): ").strip()
-        infermedica_key = console.input("  Infermedica App Key (optional): ").strip()
+        infermedica_id = console.input("  Infermedica App ID").strip()
+        infermedica_key = console.input("  Infermedica App Key ").strip()
         if infermedica_id and infermedica_key:
             break
         else:
@@ -284,7 +292,6 @@ def register() -> None:
             "infermedica_app_key": infermedica_key,
         },
         "user": {
-            "name": name,
             "age": age,
             "sex": sex
         }
@@ -676,7 +683,7 @@ def start() -> None:
     console.print(f"    [bold]Starting New Session with Klini Agent[/]")
     console.print()
 
-    session_id = generate_id()
+    session_id = id()
     with open(user_profile(ACTIVE_USER), "r") as file: # Load Clinical Profile
         clinical_profile = file.read()
 
