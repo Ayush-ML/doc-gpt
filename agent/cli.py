@@ -35,7 +35,7 @@ console = Console()
     # klini skills {skill name} - To view the entire content of the skill name that is specified
     # klini users - To view the list of created users
     # klini config - Shows All the registered data of the user
-        # klini set --mode {mode} --change {change} -- To change the value of the specific Mode to the given Change
+    # klini set --mode {mode} --change {change} -- To change the value of the specific Mode to the given Change
     # klini delete user {username} - Deletes a user profile and all associated data.
     # klini delete skill {skill_name} - Deletes a specific skill file if the agent learned something incorrect.
     # klini delete session {session_name} - Deletes a specific session and all associated data if the user wants to clear up space or remove old sessions.
@@ -576,9 +576,10 @@ def _run_session(initial_state: AgentState) -> None:
                             history = json.load(file)
                     else:
                         history = []
+                    user_message = f"All of Session Messages: {state['messages']}"
                     context = [
                         SystemMessage(content=SESSION_TITLE_PROMPT),
-                        HumanMessage(content=state['messages'])
+                        HumanMessage(content=user_message)
                     ]
                     session_title = (agent.invoke(context)).content
                     history.append({
@@ -634,16 +635,35 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                         console.print(f"[blue]{role}:[/] {content}")
                     else:
                         console.print(f"[green]{role}:[/] {content}")
+                break
+
         if not session_data:
             console.print(f"[red]Session '{session_title}' not found.[/]")
             return None
         else:
             with open(user_profile(ACTIVE_USER), "r") as file: # Load Clinical Profile
                 clinical_profile = file.read()
-            state = AgentState(session_id=session_data['session_id'],
-                                user_id=ACTIVE_USER,
-                                messages=[HumanMessage(content=m['content']) if m['role'] == 'user' else AIMessage(content=m['content']) for m in session_data['messages']],
-                                clinical_profile=clinical_profile)
+            state = AgentState(
+                session_id=session_data['session_id'],
+                user_id=ACTIVE_USER,
+                clinical_profile=clinical_profile,
+                current_step=None,
+                max_step=None,
+                retries={},
+                messages=[HumanMessage(content=m['content']) if m['role'] == 'user' else AIMessage(content=m['content']) for m in session_data['messages']],
+                end_response_reason="",
+                requested_next="",
+                requested_target_step=None,
+                all_skills={},
+                semantic_search=[],
+                used_skills=[],
+                skill_contents=[],
+                gatekeeper_decision=False,
+                gatekeeper_reason="",
+                diagnosis_started=False,
+                ever_diagnosed=False
+            )
+
             _run_session(initial_state=state)
             
 # The Function to start a new session with the agent for the user
@@ -657,7 +677,27 @@ def start() -> None:
     with open(user_profile(ACTIVE_USER), "r") as file: # Load Clinical Profile
         clinical_profile = file.read()
 
-    state = AgentState(session_id=session_id, user_id=ACTIVE_USER, clinical_profile=clinical_profile)
+        state = AgentState(
+                session_id=session_id,
+                user_id=ACTIVE_USER,
+                clinical_profile=clinical_profile,
+                current_step=None,
+                max_step=None,
+                retries={},
+                messages=[],
+                end_response_reason="",
+                requested_next="",
+                requested_target_step=None,
+                all_skills={},
+                semantic_search=[],
+                used_skills=[],
+                skill_contents=[],
+                gatekeeper_decision=False,
+                gatekeeper_reason="",
+                diagnosis_started=False,
+                ever_diagnosed=False
+        )
+
     _run_session(initial_state=state)
 
 # The Function used to Change a Specific Value
@@ -665,6 +705,7 @@ def start() -> None:
 @app.command()
 def set(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(..., "--value", "-v")) -> None:
     console.print()
+    user_config_keys = ["provider", "model", "gatekeeper", "openrouter_api_key", "email", "infermedica_app_id", "infermedica_app_key", "age", "sex"]
 
     if key == 'user':
         console.print(f"  [bold]Updating Active User[/]")
@@ -675,12 +716,12 @@ def set(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(.
         else:
             with open(APP_CONFIG, "rb") as f:
                 app_data = tomllib.load(f)
-        app_data["config"]["active_user"] = value
-        with open(APP_CONFIG, "wb") as f:
-            tomli_w.dump(app_data, f)
-        console.print(f"[green]Active user updated to '{value}'.")
+            app_data["config"]["active_user"] = value
+            with open(APP_CONFIG, "wb") as f:
+                tomli_w.dump(app_data, f)
+            console.print(f"[green]Active user updated to '{value}'.")
 
-    elif key == 'config':
+    elif key in user_config_keys:
         console.print(f"  [bold]Updating User Config[/]")
         console.print()
         config_path = user_config(ACTIVE_USER)
@@ -689,6 +730,13 @@ def set(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(.
             return None
         with open(config_path, "rb") as f:
             config_data = tomllib.load(f)
-        user_config_keys = ["provider", "model", "gatekeeper", "openrouter_api_key", "email", "infermedica_app_id", "infermedica_app_key", "age", "sex"]
-        
-    
+        config_data['config'][key] = value
+        with open(config_path, "wb") as f:
+            tomli_w.dump(config_data, f)
+        console.print(f"[green]'{key}' successfully updated to '{value}'.[/]")
+        return None
+
+    else:
+        console.print(f"[red]Invalid key: {key}[/]")
+        console.print(f"[red]You can update the active user with key 'user' or the user config with keys: {', '.join(user_config_keys)}[/]")
+        return None
