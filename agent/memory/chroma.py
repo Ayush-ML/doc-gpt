@@ -4,7 +4,7 @@
 
 import chromadb
 from datetime import datetime
-from agent.config import HISTORY
+from agent.config import user_chroma, ACTIVE_USER
 from langchain_core.messages import HumanMessage, AIMessage
 
 _client = None
@@ -14,7 +14,7 @@ _collection = None
 
 def _get_chroma() -> chromadb.Collection:
     if _client is None and _collection is None:
-        _client = chromadb.PersistentClient(path=HISTORY)
+        _client = chromadb.PersistentClient(path=user_chroma(ACTIVE_USER))
         _collection = _client.get_or_create_collection(name="agent")
     
     return _collection

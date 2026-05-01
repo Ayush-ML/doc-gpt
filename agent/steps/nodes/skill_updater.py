@@ -6,7 +6,7 @@
 import json
 from pathlib import Path
 from agent.main.state import AgentState
-from agent.config import SKILLS, INDEX, HISTORY
+from agent.config import user_skills_dir, user_skills_index, ACTIVE_USER
 from agent.main.router import get_agent
 from agent.steps.prompts import SKILL_WRITER_PROMPT, SESSION_TITLE_PROMPT
 from agent.memory.chroma import write_memory, session_exists
@@ -62,13 +62,13 @@ def run(state: AgentState) -> dict:
         summary = skill["summary"]
         content = skill["content"]
         
-        skill_path = Path(SKILLS) / f"{title}.md"
+        skill_path = Path(user_skills_dir(ACTIVE_USER)) / f"{title}.md"
         skill_path.parent.mkdir(parents=True, exist_ok=True) # Create File
         skill_path.write_text(content) # Write Skill Content to the File
 
         # Append the title and Summary to skill index
 
-        with open(INDEX, "a") as file:
+        with open(user_skills_index(ACTIVE_USER), "a") as file:
             file.write(json.dumps({"title": title, "summary": summary}) + "\n")
 
     return {}

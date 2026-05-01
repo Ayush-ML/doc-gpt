@@ -18,7 +18,7 @@ from agent.steps.nodes import step3
 from agent.steps.nodes import step4
 from agent.steps.nodes import gatekeeper
 from agent.steps.nodes import preprocess
-from agent.config import CHECKPOINTS
+from agent.config import user_checkpoints, ACTIVE_USER
 from agent.main.edges import route_after_gatekeeper
 from langgraph.graph import StateGraph, END
 from langgraph.graph.state import CompiledStateGraph
@@ -103,6 +103,6 @@ def _build_graph() -> StateGraph:
 # Only called once then reused
 
 def get_graph() -> CompiledStateGraph:
-    checkpointer = SqliteSaver.from_conn_string(str(CHECKPOINTS)) # Register Checkpoint
+    checkpointer = SqliteSaver.from_conn_string(str(user_checkpoints(ACTIVE_USER))) # Register Checkpoint
     graph = _build_graph() # Build Graph
     return graph.compile(checkpointer=checkpointer) # Compile and return

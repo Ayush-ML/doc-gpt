@@ -2,7 +2,7 @@
 # which is responsible for the Models Analysis of the Users Symptoms
 # Imported Libraries
 
-from agent.steps.prompts import STEP_1_PHASE_A, STEP_1_PHASE_B
+from agent.steps.prompts import STEP_1_PHASE_A, PHASE_B_PROMPT
 from agent.main.state import AgentState
 from agent.utils import parse_end_response, strip_end_response
 from agent.main.router import get_agent
@@ -53,7 +53,7 @@ def run(state: AgentState) -> dict:
     phase_b_user_message = f"Message History: {messages}, Selected Skill Contents: {skill_contents}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {semantic_search}"
 
     phase_b_context =  [
-    SystemMessage(content=STEP_1_PHASE_B),
+    SystemMessage(content=PHASE_B_PROMPT),
     HumanMessage(content=phase_b_user_message)
     ] # Build Context
 

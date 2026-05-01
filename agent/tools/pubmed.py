@@ -5,8 +5,7 @@
 from langchain_core.tools import tool
 from langchain_community.utilities.pubmed import PubMedAPIWrapper
 from langchain_community.tools.pubmed.tool import PubmedQueryRun
-from agent.config import EMAIL
-from agent.config import N_RESULTS
+from agent.config import EMAIL, N_RESULTS
 
 _pubmed = None
 _wrapper = None

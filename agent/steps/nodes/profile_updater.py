@@ -4,7 +4,7 @@
 
 from agent.main.state import AgentState
 from agent.main.router import get_agent
-from agent.config import PROFILE_UPDATER_PROMPT
+from agent.steps.prompts import PROFILE_UPDATER_PROMPT
 from langchain_core.messages import AIMessage, HumanMessage
 
 

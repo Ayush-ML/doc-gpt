@@ -4,8 +4,7 @@
     # -- Diagnosis
 # Imported Libraries
 
-from agent.config import CHROMA, SKILLS, USERS, INDEX, MEMORY, HISTORY, USER_CONFIG, PROVIDER, AGENT, GATEKEEPER, OPENROUTER_API_KEY, EMAIL, AGE, SEX, INFERMEDICA_APP_ID ,INFERMEDICA_APP_KEY, ACTIVE_USER
-from pathlib import Path
+from agent.config import USERS_DIR, user_config, user_dir, user_chroma, user_history, user_skills_dir, user_skills_index, user_memory_dir, PROVIDER, AGENT, GATEKEEPER, OPENROUTER_API_KEY, EMAIL, AGE, SEX, INFERMEDICA_APP_ID ,INFERMEDICA_APP_KEY, ACTIVE_USER, APP_CONFIG, user_profile
 from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
@@ -15,7 +14,7 @@ from agent.main.router import get_agent
 from agent.main.state import AgentState
 from agent.utils import generate_id
 from agent.steps.prompts import CONVERSATION_PROMPT, SESSION_TITLE_PROMPT
-import tomli_w, typer, json, tomllib, shutil
+import tomli_w, typer, json, shutil, tomllib
 from datetime import datetime
 
 # Register The App and Console
@@ -35,9 +34,8 @@ console = Console()
     # klini skills - To view the titles and a brief summary of all skills
     # klini skills {skill name} - To view the entire content of the skill name that is specified
     # klini users - To view the list of created users
-        # klini set users {user name} - To switch to the specified user name, further actions will be carried out in this user
     # klini config - Shows All the registered data of the user
-        # klini set config {config name} {change} -- To change the value of the specific config to thee value the user gave
+        # klini set --mode {mode} --change {change} -- To change the value of the specific Mode to the given Change
     # klini delete user {username} - Deletes a user profile and all associated data.
     # klini delete skill {skill_name} - Deletes a specific skill file if the agent learned something incorrect.
     # klini delete session {session_name} - Deletes a specific session and all associated data if the user wants to clear up space or remove old sessions.
@@ -51,12 +49,28 @@ def init() -> None:
     console.print(Panel("[bold]Initializing Klini Agent... [/]"))
     console.print()
 
+    # Get Username
+    while True:
+        name = console.input(f" Please Enter your Username: ").strip()
+        if name.isalpha():
+            break
+        else:
+            console.print("  [red]Name cannot be empty.[/]")
+
+    # Create App Config
+    config = {
+        "config": {
+            "active_user": name
+        }
+    }
+    with open(APP_CONFIG, "wb") as f:
+        tomli_w.dump(config, f)
+
     # Register Strings as Path
     directories = [
-        Path(SKILLS),
-        Path(USERS),
-        Path(MEMORY),
-        Path(CHROMA)
+        user_skills_dir(name),
+        user_memory_dir(name),
+        user_chroma(name),
     ]
  
     # Create Necessary Directories
@@ -68,7 +82,7 @@ def init() -> None:
             console.print(f"[yellow]→ Skipped {directory} (already exists)[/]")
 
     # Create The Skill Index
-    index_path = Path(INDEX)
+    index_path = user_skills_index(name)
     if not index_path.exists():
         index_path.touch()
         console.print(f"    [green]✓ Created Skill Index at {index_path} [/]")
@@ -76,7 +90,7 @@ def init() -> None:
         console.print(f"    [yellow]→ Skipped Creation of Skill Index, already exists at path: {index_path} [/]")
 
     # Create The User Accessed History
-    history_path = Path(HISTORY)
+    history_path = user_history(name)
     if not history_path.exists():
         history_path.touch()
         history_path.write_text("[]")
@@ -85,7 +99,7 @@ def init() -> None:
         console.print(f"    [yellow]→ Skipped Creation of History File, already exists at path: {history_path} [/]")
 
     # Create The User Config
-    config_path = Path(USER_CONFIG)
+    config_path = user_config(name)
     if not config_path.exists():
         default_config = {
             "config": {
@@ -96,9 +110,8 @@ def init() -> None:
                 "email": "",
                 "infermedica_app_id": "",
                 "infermedica_app_key": "",
-            },
-            "user": {
-                "active_user": "",
+                "age": "",
+                "sex": ""
             }
         }
         with open(config_path, "wb") as f:
@@ -122,34 +135,27 @@ def register() -> None:
     console.print(Panel("[bold]Klini Registration[/bold]", expand=False))
     console.print()
 
-    config_path = Path(USER_CONFIG)
+    config_path = user_config(ACTIVE_USER)
 
     # Check if Initialization is done
     if not config_path.exists():
         console.print("[red]Please initialize the agent first using [bold cyan]klini init[/bold cyan].[/red]")
         return None
-
-    # Check if User is Already Registered
-    if config_path.exists():
-        with open(config_path, "rb") as f:
-            existing = tomllib.load(f)
-        if existing.get("user", {}).get("active_user", ""):
-            console.print("[yellow]You are already registered.[/yellow]")
-            console.print("Use [bold cyan]klini config set[/bold cyan] to update individual values.")
-            console.print()
-            return None
         
     # Start Registration of Personal Info
     console.print(f"    [bold] Personal Information [/]")
 
     # Name
+    names = [p.name for p in USERS_DIR.iterdir() if p.is_dir()]
     while True:
         name = console.input(f"    Name: ").strip()
-        if name.isalpha():
-            break
+        if name in names:
+            console.print(f"  [red]Username already exists. Please choose a different name.[/]")
+        elif not name.isalpha():
+            console.print(f"  [red]Name cannot be empty and must only contain letters.[/]")
         else:
-            console.print("  [red]Name cannot be empty.[/]")
-
+            break
+        
     # Age
     while True:
         age = console.input(f"  Age: ").strip()
@@ -276,7 +282,9 @@ def register() -> None:
             "infermedica_app_key": infermedica_key,
         },
         "user": {
-            "active_user": name.lower().replace(" ", "_"),
+            "name": name,
+            "age": age,
+            "sex": sex
         }
     }
 
@@ -285,8 +293,7 @@ def register() -> None:
 
     # Create User's and USER.md
     user_id = name.lower().replace(" ", "_")
-    profile_dir = Path(USERS) / user_id
-    profile_dir.mkdir(parents=True, exist_ok=True)
+    profile_dir = user_dir(user_id)
 
     profile_path = profile_dir / "USER.md"
     profile_path.write_text(
@@ -347,7 +354,7 @@ def skills(skill_name = typer.Argument(None)) -> None:
     if skill_name is None:
         console.print(f"    [bold]Agent Skills[/]")
         console.print()
-        index_path = Path(INDEX)
+        index_path = user_skills_index(ACTIVE_USER)
         if not index_path.exists():
             console.print("[red]The Skills index file does not exsist, please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
             return None
@@ -367,7 +374,7 @@ def skills(skill_name = typer.Argument(None)) -> None:
             console.print()
             return None
     else:
-        skill_path = Path(SKILLS) / f"{skill_name}.md"
+        skill_path = user_skills_dir(ACTIVE_USER) / f"{skill_name}.md"
         if not skill_path.exists():
             console.print(f"[red]Skill '{skill_name}' not found.[/]")
             return None
@@ -381,11 +388,10 @@ def skills(skill_name = typer.Argument(None)) -> None:
 def profile() -> None:
     console.print(f"    [bold]Patient Clinical Profile[/]")
     console.print()
-    active_user = ACTIVE_USER
-    if not active_user:
-        console.print("[red]No active user found. Please run [bold cyan]klini register[/] to set up your profile.[/]")
+    if not ACTIVE_USER:
+        console.print("[red]No active user found. Please run [bold cyan]klini klini and klini register[/] to set up your profile.[/]")
         return None
-    profile_path = Path(USERS) / active_user / "USER.md"
+    profile_path = user_profile(ACTIVE_USER)
     if not profile_path.exists():
         console.print("[red]Profile file not found. Please run [bold cyan]klini register[/] to set up your profile.[/]")
         return None
@@ -398,7 +404,7 @@ def profile() -> None:
 def users() -> None:
     console.print(f"    [bold]Registered Users[/]")
     console.print()
-    users_path = Path(USERS)
+    users_path = USERS_DIR
     if not users_path.exists():
         console.print("[red]Users directory not found. Please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
         return None
@@ -412,13 +418,13 @@ def users() -> None:
 # The Function for Deletion
 
 @app.command()
-def delete(mode: str = typer.Argument('all'), name: str = typer.Argument(None)) -> None:
+def delete(mode: str = typer.Option('all', "--mode", "-m"), name: str = typer.Option(None, "--name", "-n")) -> None:
     if mode == "user":
         if not name:
             console.print("[red]Please specify the username to delete using [bold cyan]klini delete user {username}[/]")
             return None
         else:
-            user_path = Path(USERS) / name
+            user_path = USERS_DIR / name
             if not user_path.exists():
                 console.print(f"[red]User '{name}' not found.[/]")
                 return None
@@ -440,7 +446,7 @@ def delete(mode: str = typer.Argument('all'), name: str = typer.Argument(None)) 
         if not name:
             console.print("[red]Please specify the skill name to delete using [bold cyan]klini delete skill skill_name[/][/]")
             return None
-        skill_path = Path(SKILLS) / f"{name}.md"
+        skill_path = user_skills_dir(ACTIVE_USER) / f"{name}.md"
         if not skill_path.exists():
             console.print(f"[red]Skill '{name}' not found.[/]")
             return None
@@ -459,7 +465,7 @@ def delete(mode: str = typer.Argument('all'), name: str = typer.Argument(None)) 
             console.print("[red]Please specify the session title to delete using [bold cyan]klini delete session session_title[/][/]")
             return None
         
-        history_path = Path(HISTORY)
+        history_path = user_history(ACTIVE_USER)
         if not history_path.exists():
             console.print("[red]History file not found. Please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
             return None
@@ -499,7 +505,7 @@ def delete(mode: str = typer.Argument('all'), name: str = typer.Argument(None)) 
             return None
         else:
             # Delete Users
-            users_path = Path(USERS)
+            users_path = USERS_DIR
             if users_path.exists():
                 try:
                     shutil.rmtree(users_path)
@@ -508,55 +514,8 @@ def delete(mode: str = typer.Argument('all'), name: str = typer.Argument(None)) 
                     return None
                 console.print(f"[green]All users and associated data deleted successfully.[/]")
             else:
-                console.print(f"[yellow]→ Users directory not found, skipping.[/]")
+                console.print(f"[yellow]→ Users directory not found, Nothing to delete.[/]")
 
-            # Delete Skills
-            skills_path = Path(SKILLS)
-            if skills_path.exists():
-                try:
-                    shutil.rmtree(skills_path)
-                except Exception as e:
-                    console.print(f"[red]An error occurred while deleting skills: {e}[/]")
-                    return None
-                console.print(f"[green]All skills deleted successfully.[/]")
-            else:
-                console.print(f"[yellow]→ Skills directory not found, skipping.[/]")
-
-            # Delete Memory
-            memory_path = Path(MEMORY)
-            if memory_path.exists():
-                try:
-                    shutil.rmtree(memory_path)
-                except Exception as e:
-                    console.print(f"[red]An error occurred while deleting memory: {e}[/]")
-                    return None
-                console.print(f"[green]All memory deleted successfully.[/]")
-            else:
-                console.print(f"[yellow]→ Memory directory not found, skipping.[/]")
-
-            # Delete Chroma
-            chroma_path = Path(CHROMA)
-            if chroma_path.exists():
-                try:
-                    shutil.rmtree(chroma_path)
-                except Exception as e:
-                    console.print(f"[red]An error occurred while deleting chroma: {e}[/]")
-                    return None
-                console.print(f"[green]All chroma data deleted successfully.[/]")
-            else:
-                console.print(f"[yellow]→ Chroma directory not found, skipping.[/]")
-
-            # Delete Config
-            config_path = Path(USER_CONFIG)
-            if config_path.exists():
-                try:
-                    config_path.unlink()
-                except Exception as e:
-                    console.print(f"[red]An error occurred while deleting user config: {e}[/]")
-                    return None
-                console.print(f"[green]User config deleted successfully.[/]")
-            else:
-                console.print(f"[yellow]→ User config file not found, skipping.[/]")
             
             console.print(f"[bold green]All data deleted and agent reset to fresh state. Please run [bold cyan]klini init[/] to initialize and then [bold cyan]klini register[/] to set up your account.")
             return None
@@ -582,14 +541,10 @@ def _run_session(initial_state: AgentState) -> None:
                 continue
             state['messages'].append(HumanMessage(content=user_input))
             if not state['diagnosis_started']:
-                session_text = "\n".join([
-                f"{'User' if isinstance(m, HumanMessage) else 'Agent'}: {m.content}"
-                for m in state['messages']
-                ])
-                user_message = f"User's Clinical Profile: {state['clinical_profile']}, Current Session Messages: {session_text}"
+                user_message = f"User's Clinical Profile: {state['clinical_profile']}, Current Session Messages: {state['messages']}"
                 context = [
-                    {"role": "system", "content": CONVERSATION_PROMPT},
-                    {"role": "user", "content": user_message}
+                    SystemMessage(content=CONVERSATION_PROMPT),
+                    HumanMessage(content=user_message)
                 ]
                 console.print("[green]Klini:[/] ", end="")
                 response = ""
@@ -600,7 +555,6 @@ def _run_session(initial_state: AgentState) -> None:
                     console.print(chunk.content, end="", flush=True)
                     response += chunk.content
                 state['messages'].append(AIMessage(content=response))
-                console.print(f"[green]Klini:[/] {response}")
 
             elif state['diagnosis_started']:
                 with console.status("[green]Klini is diagnosing...[/]"):
@@ -616,24 +570,20 @@ def _run_session(initial_state: AgentState) -> None:
             console.print("[yellow]Session ended by user.[/]")
             if state['messages']:
                 with console.status("[green]Saving session...[/]"):
-                    history_path = Path(HISTORY)
+                    history_path = user_history(ACTIVE_USER)
                     if history_path.exists():
                         with open(history_path, "r") as file:
                             history = json.load(file)
                     else:
                         history = []
-                    session_text = "\n".join([
-                    f"{'User' if isinstance(m, HumanMessage) else 'Agent'}: {m.content}"
-                    for m in state['messages']
-                    ])
                     context = [
-                        {"role": "system", "content": SESSION_TITLE_PROMPT},
-                        {"role": "user", "content": session_text}
+                        SystemMessage(content=SESSION_TITLE_PROMPT),
+                        HumanMessage(content=state['messages'])
                     ]
                     session_title = (agent.invoke(context)).content
                     history.append({
                         "session_title": session_title,
-                        "time": datetime.now(),
+                        "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
                         "session_id": state['session_id'],
                         "messages": [{"role": m.type, "content": m.content} for m in state['messages']]
                     })
@@ -647,7 +597,7 @@ def _run_session(initial_state: AgentState) -> None:
 
 @app.command()
 def sessions(session_title: str = typer.Argument(None)) -> None:
-    history_path = Path(HISTORY)
+    history_path = user_history(ACTIVE_USER)
     if not history_path.exists():
         console.print("[red]History file not found. Please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
         return None
@@ -670,6 +620,7 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
         return None
     
     if session_title:
+        session_data = None
         for session in history:
             if session['session_title'].lower() == session_title.lower():
                 console.print(f"Resuming session: [cyan]{session['session_title']}[/]")
@@ -687,7 +638,7 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
             console.print(f"[red]Session '{session_title}' not found.[/]")
             return None
         else:
-            with open(f"agent\users\{ACTIVE_USER}\USER.md", "r") as file: # Load Clinical Profile
+            with open(user_profile(ACTIVE_USER), "r") as file: # Load Clinical Profile
                 clinical_profile = file.read()
             state = AgentState(session_id=session_data['session_id'],
                                 user_id=ACTIVE_USER,
@@ -703,8 +654,41 @@ def start() -> None:
     console.print()
 
     session_id = generate_id()
-    with open(f"agent\users\{ACTIVE_USER}\USER.md", "r") as file: # Load Clinical Profile
+    with open(user_profile(ACTIVE_USER), "r") as file: # Load Clinical Profile
         clinical_profile = file.read()
 
     state = AgentState(session_id=session_id, user_id=ACTIVE_USER, clinical_profile=clinical_profile)
     _run_session(initial_state=state)
+
+# The Function used to Change a Specific Value
+
+@app.command()
+def set(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(..., "--value", "-v")) -> None:
+    console.print()
+
+    if key == 'user':
+        console.print(f"  [bold]Updating Active User[/]")
+        console.print()
+        user_path = USERS_DIR / value
+        if not user_path.exists():
+            console.print(f"[red]User '{value}' not found. Please enter a valid username.[/]")
+        else:
+            with open(APP_CONFIG, "rb") as f:
+                app_data = tomllib.load(f)
+        app_data["config"]["active_user"] = value
+        with open(APP_CONFIG, "wb") as f:
+            tomli_w.dump(app_data, f)
+        console.print(f"[green]Active user updated to '{value}'.")
+
+    elif key == 'config':
+        console.print(f"  [bold]Updating User Config[/]")
+        console.print()
+        config_path = user_config(ACTIVE_USER)
+        if not config_path.exists():
+            console.print("[red]User config file not found. Please run [bold cyan]klini init[/] to create all directories and files and then run [bold cyan]klini register[/] to set up the Config![/]")
+            return None
+        with open(config_path, "rb") as f:
+            config_data = tomllib.load(f)
+        user_config_keys = ["provider", "model", "gatekeeper", "openrouter_api_key", "email", "infermedica_app_id", "infermedica_app_key", "age", "sex"]
+        
+    
