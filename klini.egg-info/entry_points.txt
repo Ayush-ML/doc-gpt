@@ -1,0 +1,2 @@
+[console_scripts]
+klini = agent.cli:app
