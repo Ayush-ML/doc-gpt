@@ -163,8 +163,10 @@ def register() -> None:
             age = int(age)
             if age > 0:
                 break
+            else:
+                console.print("  [red]Age must be a positive number.[/]")
         else:
-            console.print("  [red]Please enter a valid age That is atleast greater than 0.[/]")
+            console.print("  [red]Age should Always be a Number[/]")
 
     # Sex
     while True:
@@ -551,9 +553,10 @@ def _run_session(initial_state: AgentState) -> None:
                 for chunk in agent.stream(context):
                     if "<DIAGNOSE/>" in chunk.content:
                         state['diagnosis_started'] = True
-                        chunk.content = chunk.content.replace("<DIAGNOSE/>", "").strip()
-                    console.print(chunk.content, end="", flush=True)
-                    response += chunk.content
+                        clean = chunk.content.replace("<DIAGNOSE/>", "").strip()
+                    console.print(clean, end="", flush=True)
+                    response += clean
+                console.print()
                 state['messages'].append(AIMessage(content=response))
 
             elif state['diagnosis_started']:
@@ -677,7 +680,7 @@ def start() -> None:
     with open(user_profile(ACTIVE_USER), "r") as file: # Load Clinical Profile
         clinical_profile = file.read()
 
-        state = AgentState(
+    state = AgentState(
                 session_id=session_id,
                 user_id=ACTIVE_USER,
                 clinical_profile=clinical_profile,
@@ -696,7 +699,7 @@ def start() -> None:
                 gatekeeper_reason="",
                 diagnosis_started=False,
                 ever_diagnosed=False
-        )
+    )
 
     _run_session(initial_state=state)
 
@@ -720,6 +723,7 @@ def set(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(.
             with open(APP_CONFIG, "wb") as f:
                 tomli_w.dump(app_data, f)
             console.print(f"[green]Active user updated to '{value}'.")
+            return None
 
     elif key in user_config_keys:
         console.print(f"  [bold]Updating User Config[/]")
@@ -740,3 +744,8 @@ def set(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(.
         console.print(f"[red]Invalid key: {key}[/]")
         console.print(f"[red]You can update the active user with key 'user' or the user config with keys: {', '.join(user_config_keys)}[/]")
         return None
+    
+# Run the Complete Code
+
+if __name__ == "__main__":
+    app()
