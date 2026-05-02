@@ -103,6 +103,6 @@ def _build_graph() -> StateGraph:
 # Only called once then reused
 
 def get_graph() -> CompiledStateGraph:
-    checkpointer = SqliteSaver.from_conn_string(str(user_checkpoints(ACTIVE_USER))) # Register Checkpoint
-    graph = _build_graph() # Build Graph
-    return graph.compile(checkpointer=checkpointer) # Compile and return
+    with SqliteSaver.from_conn_string(str(user_checkpoints(ACTIVE_USER))) as checkpointer:
+        graph = _build_graph()
+        return graph.compile(checkpointer=checkpointer)

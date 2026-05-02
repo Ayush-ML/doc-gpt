@@ -8,18 +8,14 @@ from langchain_ollama import ChatOllama
 def _openrouter(model: str) -> ChatOpenRouter:
     return ChatOpenRouter(model=model, temperature=TEMPERATURE, api_key=OPENROUTER_API_KEY, base_url=OPENROUTER_BASE_URL)
 
-def _ollama(model: str) -> ChatOllama:
-    return ChatOllama(model=model, temperature=TEMPERATURE, base_url=OLLAMA_BASE_URL)
-
 def _get_model(model: str) -> ChatOllama | ChatOpenRouter:
     providers = {
-        'ollama': _ollama,
         'openrouter': _openrouter
     }
     if PROVIDER not in providers:
         raise ValueError(f"Unknown provider: '{PROVIDER}'. Choose from: {list(providers.keys())}")
     
-    return providers[PROVIDER](model)
+    return PROVIDER(model)
 
 def get_agent() -> ChatOllama | ChatOpenRouter:
     return _get_model(model=AGENT)

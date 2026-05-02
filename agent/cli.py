@@ -4,7 +4,9 @@
     # -- Diagnosis
 # Imported Libraries
 
-from agent.config import USERS_DIR, user_config, user_dir, user_chroma, user_history, user_skills_dir, user_skills_index, user_memory_dir, PROVIDER, AGENT, GATEKEEPER, OPENROUTER_API_KEY, EMAIL, AGE, SEX, INFERMEDICA_APP_ID ,INFERMEDICA_APP_KEY, ACTIVE_USER, APP_CONFIG, user_profile
+import warnings
+warnings.filterwarnings("ignore")
+from agent.config import USERS_DIR, user_config, user_dir, user_chroma, user_history, user_skills_dir, user_skills_index, user_memory_dir, PROVIDER, AGENT, GATEKEEPER, OPENROUTER_API_KEY, EMAIL, AGE, SEX, ACTIVE_USER, APP_CONFIG, user_profile
 from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
@@ -51,15 +53,22 @@ def init() -> None:
 
 
     # Get Username
-    names = [p.name for p in USERS_DIR.iterdir() if p.is_dir()]
+    if USERS_DIR.exists():
+        names = [p.name for p in USERS_DIR.iterdir() if p.is_dir()]
+    else:
+        names = None
+
     while True:
         name = console.input(f" Please Enter your Username: ").strip()
-        if name in names:
-            console.print(f"  [red]Username already exists. Please choose a different name.[/]")
-        if name:
-            break
+        if names:
+            if name in names:
+                console.print(f"  [red]Username already exists. Please choose a different name.[/]")
+                continue
         else:
-            console.print("  [red]Name cannot be empty.[/]")
+            if name:
+                break
+            else:
+                console.print("  [red]Name cannot be empty.[/]")
 
     # Create App Config
     config = {
@@ -84,7 +93,7 @@ def init() -> None:
             directory.mkdir(parents=True, exist_ok=True)
             console.print(f"    [green]✓ Created {directory} [/]")
         else:
-            console.print(f"[yellow]→ Skipped {directory} (already exists)[/]")
+            console.print(f"    [yellow]→ Skipped {directory} (already exists)[/]")
 
     # Create The Skill Index
     index_path = user_skills_index(name)
@@ -113,8 +122,6 @@ def init() -> None:
                 "gatekeeper": "",
                 "openrouter_api_key": "",
                 "email": "",
-                "infermedica_app_id": "",
-                "infermedica_app_key": "",
                 "age": "",
                 "sex": ""
             }
@@ -149,6 +156,7 @@ def register() -> None:
         
     # Start Registration of Personal Info
     console.print(f"    [bold] Personal Information [/]")
+    console.print()
 
     # Name
     names = [p.name for p in USERS_DIR.iterdir() if p.is_dir()]
@@ -198,73 +206,27 @@ def register() -> None:
             break
         else:
             console.print("  [red]Please enter a valid email address.[/red]")
-
-    # Infermedica
-    console.print("  Infermedica provides clinical symptom classification (free tier).")
-    console.print("  Get your free credentials at [link=https://developer.infermedica.com]https://developer.infermedica.com[/]!")
-    console.print()
-    while True:
-        infermedica_id = console.input("  Infermedica App ID").strip()
-        infermedica_key = console.input("  Infermedica App Key ").strip()
-        if infermedica_id and infermedica_key:
-            break
-        else:
-            console.print(f"    [red] Please enter a Valid Infermedica ID and Key [/]")
         
-    # Providers
-    console.print("  Providers:")
-    console.print("    [cyan]1[/] ollama     (local, no API key needed)")
-    console.print("    [cyan]2[/] openrouter (cloud, API key required)")
+    # API Key
+    console.print("  Get your free API key for OpenRouter at [link=https://openrouter.ai]https://openrouter.ai[/]")
     console.print()
     while True:
-        provider_input = console.input("  Choose provider (1 or 2): ").strip()
-        if provider_input == "1":
-            provider = "ollama"
+        api_key = console.input("  OpenRouter API key: ").strip()
+        if api_key:
             break
-        elif provider_input == "2":
-            provider = "openrouter"
-            break
-        else:
-            console.print("  [red]Please enter 1 or 2.[/]")
-            console.print()
-
+        console.print("  [red]API key cannot be empty for OpenRouter.[/red]")
     console.print()
 
-    # Model
-    if provider == "ollama":
-        console.print("  Recommended Ollama models:")
-        console.print("    [cyan]phi3:mini[/]      3.8B — fast on CPU, good reasoning")
-        console.print("    [cyan]gemma2:2b[/]      2B   — very fast, decent quality")
-        console.print("    [cyan]mistral:7b-q4[/]  7B   — strong reasoning, slower on CPU")
-        console.print()
-        while True:
-            model = console.input("  Model name: ").strip()
-            if model:
-                break
-            else:
-                console.print("  [red]Model name cannot be empty.[/]")
-    elif provider == 'openrouter':
-        # API Key
-        console.print("  Get your free API key at [link=https://openrouter.ai]https://openrouter.ai[/]")
-        console.print()
-        while True:
-            api_key = console.input("  OpenRouter API key: ").strip()
-            if api_key:
-                break
-            console.print("  [red]API key cannot be empty for OpenRouter.[/red]")
-        console.print()
-
-        console.print("  Recommended OpenRouter free models:")
-        console.print("    [cyan]meta-llama/llama-3.1-8b-instruct:free[/]")
-        console.print("    [cyan]microsoft/phi-3-mini-128k-instruct:free[/]")
-        console.print("    [cyan]mistralai/mistral-7b-instruct:free[/]")
-        console.print("    [cyan]deepseek/deepseek-r1:free[/]")
-        console.print()
-        while True:
-            model = console.input("  Model name: ").strip()
-            if model:
-                break
-            console.print("  [red]Model name cannot be empty.[/]")
+    console.print("  Recommended OpenRouter free models:")
+    console.print("    [cyan]meta-llama/llama-3.1-8b-instruct:free[/]")
+    console.print("    [cyan]microsoft/phi-3-mini-128k-instruct:free[/]")
+    console.print("    [cyan]mistralai/mistral-7b-instruct:free[/]")
+    console.print()
+    while True:
+        model = console.input("  Model name: ").strip()
+        if model:
+            break
+        console.print("  [red]Model name cannot be empty.[/]")
 
     console.print()
 
@@ -283,14 +245,12 @@ def register() -> None:
 
     updated_config = {
         "config": {
-            "provider": provider,
+            "provider": 'openrouter',
             "model": model,
             "gatekeeper": gatekeeper,
-            "openrouter_api_key": api_key if provider == "openrouter" else "",
-            "email": email,
-            "infermedica_app_id": infermedica_id,
-            "infermedica_app_key": infermedica_key,
-        },
+            "openrouter_api_key": api_key,
+            "email": email
+            },
         "user": {
             "age": age,
             "sex": sex
@@ -301,8 +261,7 @@ def register() -> None:
         tomli_w.dump(updated_config, f)
 
     # Create User's and USER.md
-    user_id = name.lower().replace(" ", "_")
-    profile_dir = user_dir(user_id)
+    profile_dir = user_dir(ACTIVE_USER)
 
     profile_path = profile_dir / "USER.md"
     profile_path.write_text(
@@ -348,9 +307,7 @@ def config() -> None:
         f"  Agent Model: {AGENT}\n"
         f"  Gatekeeper Model: {GATEKEEPER}\n"
         f"  User's Email: {EMAIL}\n"
-        f"  API Key if Provider is OpenRouter: {OPENROUTER_API_KEY}\n"
-        f"  Infermedica ID: {INFERMEDICA_APP_ID}\n"
-        f"  Infermedica API Key: {INFERMEDICA_APP_KEY}\n",
+        f"  API Key if Provider is OpenRouter: {OPENROUTER_API_KEY}\n",
         expand=False
     ))
     console.print(" To change any of these settings, use [bold cyan]klini config set {config name} {new value}[/]")
@@ -449,7 +406,7 @@ def delete(mode: str = typer.Option('all', "--mode", "-m"), name: str = typer.Op
                     except Exception as e:
                         console.print(f"[red]An error occurred while deleting user '{name}': {e}[/]")
                         return None
-                    console.print(f"[green]User '{name}' and all associated data deleted successfully.[/]")
+                    console.print("[green] Used Deleted Succesfully")
 
     elif mode == "skill":
         if not name:
@@ -521,11 +478,19 @@ def delete(mode: str = typer.Option('all', "--mode", "-m"), name: str = typer.Op
                 except Exception as e:
                     console.print(f"[red]An error occurred while deleting users: {e}[/]")
                     return None
-                console.print(f"[green]All users and associated data deleted successfully.[/]")
             else:
-                console.print(f"[yellow]→ Users directory not found, Nothing to delete.[/]")
-
+                console.print(f"[yellow]→ Users directory not found, Skipping.[/]")
             
+            # Delete App Config
+            if APP_CONFIG.exists():
+                try:
+                    APP_CONFIG.unlink()
+                except Exception as e:
+                    console.print(f"[red]An error occurred while deleting app config: {e}[/]")
+                    return None
+            else:
+                console.print(f"[yellow]→ App config file not found, Skipping.[/]")
+                
             console.print(f"[bold green]All data deleted and agent reset to fresh state. Please run [bold cyan]klini init[/] to initialize and then [bold cyan]klini register[/] to set up your account.")
             return None
     else:
@@ -718,7 +683,7 @@ def set(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(.
     user_config_keys = ["provider", "model", "gatekeeper", "openrouter_api_key", "email", "infermedica_app_id", "infermedica_app_key", "age", "sex"]
 
     if key == 'user':
-        console.print(f"  [bold]Updating Active User[/]")
+        console.print(f"[bold]Updating Active User[/]")
         console.print()
         user_path = USERS_DIR / value
         if not user_path.exists():
@@ -726,7 +691,11 @@ def set(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(.
         else:
             with open(APP_CONFIG, "rb") as f:
                 app_data = tomllib.load(f)
-            app_data["config"]["active_user"] = value
+            if app_data["config"]["active_user"] == value:
+                console.print(f"[yellow]'{value}' is already the active user.[/], Skipping...")
+                return None
+            else: 
+                app_data["config"]["active_user"] = value
             with open(APP_CONFIG, "wb") as f:
                 tomli_w.dump(app_data, f)
             console.print(f"[green]Active user updated to '{value}'.")

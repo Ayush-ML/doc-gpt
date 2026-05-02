@@ -63,10 +63,6 @@ OPENROUTER_API_KEY = _cfg.get("openrouter_api_key", "")
 
 # Infermedica
 EMAIL = _cfg.get("email", "")
-INFERMEDICA_APP_ID = _cfg.get("infermedica_app_id", "")
-INFERMEDICA_APP_KEY = _cfg.get("infermedica_app_key", "")
-PARSE_URL = "https://api.infermedica.com/v3/parse"
-DIAGNOSIS_URL = "https://api.infermedica.com/v3/diagnosis"
 
 # Values
 TEMPERATURE = 0.3
