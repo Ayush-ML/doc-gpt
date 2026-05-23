@@ -10,6 +10,9 @@ from agent.tools.web_search import web_search
 from agent.tools.pubmed import pubmed
 from agent.tools.semantic_search import semantic_search
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from pathlib import Path
+from agent.config import user_skills_dir, ACTIVE_USER
+
 
 # Create a function that handles Phase A of Step 1
 # Phase A is responsible for Skill Selection
@@ -45,12 +48,17 @@ def run(state: AgentState) -> dict:
 
 
     for skill in skills:
-        with open(f"agent\skills\{skill}.md", "r") as file:
-            skill_contents.append(file.read()) # Get all Skill Contexts
+        skill_path = Path(user_skills_dir(ACTIVE_USER)) / f"{skill}.md"
+        try:
+            with open(skill_path, "r", encoding="utf-8") as file:
+                skill_contents.append(file.read())
+        except FileNotFoundError:
+            # skip missing skill files
+            continue # Get all Skill Contexts
 
     agent_b = agent.bind_tools([web_search, pubmed, semantic_search])
 
-    phase_b_user_message = f"Message History: {messages}, Selected Skill Contents: {skill_contents}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {semantic_search}"
+    phase_b_user_message = f"Message History: {messages}, Selected Skill Contents: {skill_contents}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {sem_search}"
 
     phase_b_context =  [
     SystemMessage(content=PHASE_B_PROMPT),

@@ -12,11 +12,10 @@ from agent.memory.chroma import search
 
 def run(state: AgentState) -> dict:
     user_message = state['messages'][0].content # Load User Message
-    user_id = state['user_id'] # User ID
     all_skills = {}
 
     with open(user_skills_index(ACTIVE_USER), "r") as file: # Load Skills Index
-        for line in file.read():
+        for line in file.readlines():
             entry = json.loads(line.strip())
             all_skills.update(entry)
 
@@ -25,7 +24,7 @@ def run(state: AgentState) -> dict:
 
     try:
         semantic_search = search(user_query=user_message) # Load Semantic Search Results
-    except:
+    except Exception as e:
         semantic_search = [] # Return Empty if Collection does not exsist or throws an error for whatever reason
 
     return {

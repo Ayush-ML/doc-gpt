@@ -57,12 +57,9 @@ if ACTIVE_USER:
 PROVIDER = _cfg.get("provider", "")
 AGENT = _cfg.get("model", "")
 GATEKEEPER = _cfg.get("gatekeeper", "")
-OLLAMA_BASE_URL = "http://localhost:11434"
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-OPENROUTER_API_KEY = _cfg.get("openrouter_api_key", "")
+API_KEY = _cfg.get("api_key", "")
+EMAIL = _usr.get("email", "")
 
-# Infermedica
-EMAIL = _cfg.get("email", "")
 
 # Values
 TEMPERATURE = 0.3
