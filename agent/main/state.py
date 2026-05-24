@@ -19,7 +19,7 @@ class AgentState(TypedDict):
     # Step Handler
 
     current_step: Literal[1, 2, 3, 4]
-    max_step: int
+    max_reached_step: int
     retries: dict[int, int]
 
     # Session Handling

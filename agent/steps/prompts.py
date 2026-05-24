@@ -21,7 +21,7 @@ Step 4 - Diagnosis: Must contain primary diagnosis, differential diagnoses, key 
 
 ## Output Format
 {
-    "approved": True or False,
+    "approved": true or false,
     "reason": "brief explanation of why you chose your decision decision"
 }
 

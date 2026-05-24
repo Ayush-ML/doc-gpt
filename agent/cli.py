@@ -194,7 +194,7 @@ def register() -> None:
         # Sex
         while True:
             sex = console.input(f"  Sex(can be 'male', 'female' or 'other'): ")
-            if sex in ['male', 'female', 'other']:
+            if sex.lower() in ['male', 'female', 'other']:
                 break
             else:
                 console.print("  [red]Please enter male, female, or other.[/]")
@@ -217,25 +217,85 @@ def register() -> None:
         console.print("[bold underline]Supported Providers and Models[/]\n")
 
         console.print("[cyan]- google[/]")
-        console.print("    [green]• gemini-pro[/]")
+        console.print("    [green]• gemini-2.5-pro[/]")
+        console.print("    [green]• gemini-2.5-flash[/]")
+        console.print("    [green]• gemini-2.0-flash[/]")
+        console.print("    [green]• gemini-2.0-flash-lite[/]")
         console.print("    [green]• gemini-1.5-pro[/]")
-        console.print("    [green]• gemini-1.0[/]")
-        console.print("    [green]• gemini-ultra[/]")
+        console.print("    [green]• gemini-1.5-flash[/]")
+        console.print("    [green]• gemini-1.5-flash-8b[/]")
+        console.print("    [green]• gemini-1.0-pro[/]")
         console.print()
 
         console.print("[cyan]- openai[/]")
         console.print("    [green]• gpt-4.1[/]")
+        console.print("    [green]• gpt-4.1-mini[/]")
+        console.print("    [green]• gpt-4.1-nano[/]")
         console.print("    [green]• gpt-4o[/]")
         console.print("    [green]• gpt-4o-mini[/]")
+        console.print("    [green]• gpt-4-turbo[/]")
+        console.print("    [green]• gpt-4[/]")
         console.print("    [green]• gpt-3.5-turbo[/]")
+        console.print("    [green]• o4-mini[/]")
+        console.print("    [green]• o3[/]")
+        console.print("    [green]• o3-mini[/]")
+        console.print("    [green]• o1[/]")
+        console.print("    [green]• o1-mini[/]")
+        console.print()
+
+        console.print("[cyan]- anthropic[/]")
+        console.print("    [green]• claude-opus-4-7[/]")
+        console.print("    [green]• claude-opus-4-6[/]")
+        console.print("    [green]• claude-sonnet-4-6[/]")
+        console.print("    [green]• claude-haiku-4-5-20251001[/]")
+        console.print()
+
+        console.print("[cyan]- cohere[/]")
+        console.print("    [green]• command-a-03-2025[/]")
+        console.print("    [green]• command-r-plus[/]")
+        console.print("    [green]• command-r[/]")
+        console.print("    [green]• command-r7b-12-2024[/]")
+        console.print("    [green]• command-light[/]")
+        console.print()
+
+        console.print("[cyan]- azure[/]")
+        console.print("    [green]• gpt-4.1[/]")
+        console.print("    [green]• gpt-4o[/]")
+        console.print("    [green]• gpt-4o-mini[/]")
+        console.print("    [green]• gpt-4-turbo[/]")
+        console.print("    [green]• gpt-4[/]")
+        console.print("    [green]• gpt-3.5-turbo[/]")
+        console.print("    [green]• o3[/]")
+        console.print("    [green]• o3-mini[/]")
+        console.print("    [green]• o1[/]")
+        console.print()
+
+        console.print("[cyan]- mistral[/]")
+        console.print("    [green]• mistral-large-latest[/]")
+        console.print("    [green]• mistral-medium-latest[/]")
+        console.print("    [green]• mistral-small-latest[/]")
+        console.print("    [green]• codestral-latest[/]")
+        console.print("    [green]• ministral-8b-latest[/]")
+        console.print("    [green]• ministral-3b-latest[/]")
+        console.print("    [green]• open-mistral-nemo[/]")
+        console.print()
+
+        console.print("[cyan]- groq[/]")
+        console.print("    [green]• llama-3.3-70b-versatile[/]")
+        console.print("    [green]• llama-3.1-8b-instant[/]")
+        console.print("    [green]• llama3-70b-8192[/]")
+        console.print("    [green]• llama3-8b-8192[/]")
+        console.print("    [green]• gemma2-9b-it[/]")
+        console.print("    [green]• mixtral-8x7b-32768[/]")
+        console.print("    [green]• deepseek-r1-distill-llama-70b[/]")
         console.print()
 
         # Provider
         console.print("  The provider is the company that provides the language model API.")
         console.print()
         while True:
-            provider = console.input("  Model Provider(google or openai): ").strip().lower()
-            if provider in ['google', 'openai']:
+            provider = console.input("  Model Provider: ").strip().lower()
+            if provider in ['google', 'openai', 'anthropic', 'cohere', 'azure', 'mistral', 'groq']:
                 break
             else:
                 console.print("  [red]Currently, only 'google' and 'openai' are supported as model providers.[/]")
@@ -371,7 +431,7 @@ def skills(skill_name = typer.Argument(None)) -> None:
                 for line in f:
                     index_data.append(json.loads(line))
             if not index_data:
-                console.print("[red]No skills found. Start a session with [bold cyan]klini start[/] to let the agent learn new skills![/]")
+                console.print("[yellow]No skills found. Start a session with [bold cyan]klini start[/] to let the agent learn new skills![/]")
                 return None
             skills = [item['title'] for item in index_data]
             summaries = [item['summary'] for item in index_data]
@@ -602,7 +662,7 @@ def _run_session(initial_state: AgentState) -> None:
 
             elif state['diagnosis_started']:
                 with console.status("[green]Klini is diagnosing...[/]"):
-                    result = graph.invoke(state)
+                    result = graph.invoke(state, config={"configurable": {"thread_id": state['session_id']}})
                 console.print(f"[green]Klini[/] Diagnosis complete.")
                 state = result
                 last_message = state['messages'][-1].content
@@ -625,18 +685,32 @@ def _run_session(initial_state: AgentState) -> None:
                         SystemMessage(content=SESSION_TITLE_PROMPT),
                         HumanMessage(content=user_message)
                     ]
-                    session_title = (agent.invoke(context)).content
-                    history.append({
+                    try:
+                        session_title = (agent.invoke(context)).content
+                    except Exception as e:
+                        console.print(f"[red]An error occurred while generating session title: {e}[/]")
+                        session_title = "Untitled Session"
+                    updated_session = {
                         "session_title": session_title,
                         "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
                         "session_id": state['session_id'],
                         "messages": [{"role": "human" if isinstance(m, HumanMessage) else "assistant", "content": m.content} for m in state['messages']]
-                    })
+                    }
+                    
+                    # Remove any existing session with the same session_id to avoid duplicates
+                    history = [s for s in history if s['session_id'] != state['session_id']]
+                    history.append(updated_session)
+                    
                     with open(history_path, "w") as file:
                         json.dump(history, file, indent=4)
 
                 console.print(f"[green]Session saved with title: {session_title}[/]")
             return None
+        
+        except Exception as e:
+            console.print(f"[red]An error occurred during the session: {e}[/]")
+            console.print(traceback.format_exc())
+            continue
 
 # Create The Sessions Command to view all sessions or resume a specific session
 
@@ -692,8 +766,8 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                     session_id=session_data['session_id'],
                     user_id=ACTIVE_USER,
                     clinical_profile=clinical_profile,
-                    current_step=None,
-                    max_step=None,
+                    current_step=1,
+                    max_reached_step=1,
                     retries={},
                     messages=[HumanMessage(content=m['content']) if m['role'] == 'human' else AIMessage(content=m['content']) for m in session_data['messages']],
                     end_response_reason="",
@@ -731,8 +805,8 @@ def start() -> None:
                     session_id=session_id,
                     user_id=ACTIVE_USER,
                     clinical_profile=clinical_profile,
-                    current_step=None,
-                    max_step=None,
+                    current_step=1,
+                    max_reached_step=1,
                     retries={},
                     messages=[],
                     end_response_reason="",
@@ -757,7 +831,7 @@ def start() -> None:
 # The Function used to Change a Specific Value
 
 @app.command()
-def set(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(..., "--value", "-v")) -> None:
+def update(key: str = typer.Option(..., "--key", "-k"), value: str = typer.Option(..., "--value", "-v")) -> None:
     try:
         console.print()
         user_config_keys = ["provider", "model", "gatekeeper", "api_key", "email", "infermedica_app_id", "infermedica_app_key", "age", "sex"]

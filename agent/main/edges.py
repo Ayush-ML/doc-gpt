@@ -34,6 +34,7 @@ def route_after_gatekeeper(state: AgentState) -> str:
             next_step = current_step + 1
             if current_step == 4: # Just Force Forward
                 return "profile_updater"
+            return f"step{next_step}"
         else:
             return f"step{current_step}" # Retry Current
 

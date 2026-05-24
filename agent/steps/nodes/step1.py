@@ -65,7 +65,7 @@ def run(state: AgentState) -> dict:
     HumanMessage(content=phase_b_user_message)
     ] # Build Context
 
-    phase_b_response = (agent.invoke(phase_b_context)).content
+    phase_b_response = (agent_b.invoke(phase_b_context)).content
 
     phase_b_response = strip_end_response(phase_b_response)
 

@@ -23,6 +23,7 @@ from agent.main.edges import route_after_gatekeeper
 from langgraph.graph import StateGraph, END
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
+import sqlite3
 from langgraph.checkpoint.sqlite import SqliteSaver
 
 # Register My Tools as Nodes
@@ -103,6 +104,9 @@ def _build_graph() -> StateGraph:
 # Only called once then reused
 
 def get_graph() -> CompiledStateGraph:
-    with SqliteSaver.from_conn_string(str(user_checkpoints(ACTIVE_USER))) as checkpointer:
-        graph = _build_graph()
-        return graph.compile(checkpointer=checkpointer)
+    db_path = user_checkpoints(ACTIVE_USER)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(db_path), check_same_thread=False)
+    checkpointer = SqliteSaver(conn)
+    graph = _build_graph()
+    return graph.compile(checkpointer=checkpointer)

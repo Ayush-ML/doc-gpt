@@ -3,7 +3,11 @@
 
 from typing import Any
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, AzureChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_cohere import ChatCohere
+from langchain_mistralai import ChatMistralAI
+from langchain_groq import ChatGroq
 from agent.config import PROVIDER, AGENT, GATEKEEPER, API_KEY, TEMPERATURE
 
 def _google_genai(model: str) -> ChatGoogleGenerativeAI:
@@ -14,10 +18,35 @@ def _openai(model: str) -> ChatOpenAI:
     return ChatOpenAI(model_name=model, temperature=TEMPERATURE, openai_api_key=API_KEY)
 
 
+def _anthropic(model: str) -> ChatAnthropic:
+    return ChatAnthropic(model=model, temperature=TEMPERATURE, api_key=API_KEY)
+
+
+def _cohere(model: str) -> ChatCohere:
+    return ChatCohere(model=model, temperature=TEMPERATURE, api_key=API_KEY)
+
+
+def _azure_openai(model: str) -> AzureChatOpenAI:
+    return AzureChatOpenAI(model=model, temperature=TEMPERATURE, api_key=API_KEY)
+
+
+def _mistral(model: str) -> ChatMistralAI:
+    return ChatMistralAI(model=model, temperature=TEMPERATURE, api_key=API_KEY)
+
+
+def _groq(model: str) -> ChatGroq:
+    return ChatGroq(model=model, temperature=TEMPERATURE, api_key=API_KEY)
+
+
 def _get_model(model: str) -> Any:
     providers = {
         'google': _google_genai,
         'openai': _openai,
+        'anthropic': _anthropic,
+        'cohere': _cohere,
+        'azure': _azure_openai,
+        'mistral': _mistral,
+        'groq': _groq,
     }
     if PROVIDER not in providers:
         raise ValueError(f"Unknown provider: '{PROVIDER}'. Choose from: {list(providers.keys())}")
