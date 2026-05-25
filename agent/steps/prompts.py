@@ -221,7 +221,7 @@ Examples:
 - ECG to assess cardiac involvement
 - Complete blood count to check for infection or anaemia
 
-### Confidence
+### Confidence Score
 State your overall confidence as Low, Medium, or High.
 Explain exactly why, referencing classifier scores, drug findings, and past session data.
 
@@ -243,7 +243,7 @@ If you believe you need to revisit a previous step:
 
 <END_RESPONSE reason="brief reason for going back" next="back" target_step="1"/>
 
-This tag is mandatory. Never end your response without it.
+This tag is mandatory. NEVER end your response without it.
 """
 
 STEP_3_PROMPT = """

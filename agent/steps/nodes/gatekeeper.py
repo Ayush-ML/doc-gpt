@@ -5,7 +5,7 @@
 from agent.main.state import AgentState
 from agent.main.router import get_gatekeeper
 from agent.steps.prompts import GATEKEEPER_PROMPT
-import json
+from agent.utils import extract_gatekeeper_response
 
 # Create the Function that handles what happens in the Node
 
@@ -34,10 +34,11 @@ def run(state: AgentState) -> dict:
     ]
 
     response = gatekeeper.invoke(messages)
-    response = json.loads(response.content)
+    result = extract_gatekeeper_response(response.content)
+    print(f"Gatekeeper Response: {result}")
     return {
-        "gatekeeper_decision": response['approved'],
-        "gatekeeper_reason": response['reason']
+        "gatekeeper_decision": result.get('approved', False),
+        "gatekeeper_reason": result.get('reason', 'No reason provided.')
     }
     
 
