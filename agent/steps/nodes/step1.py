@@ -40,6 +40,8 @@ def run(state: AgentState) -> dict:
 
     phase_a_response = agent_a.invoke(phase_a_context) # Get Response
 
+    print(f"Step 1 Phase A Response: {phase_a_response.content}")
+
     skills = [
     line.strip() 
     for line in phase_a_response.content.strip().splitlines()
@@ -67,11 +69,14 @@ def run(state: AgentState) -> dict:
 
     phase_b_response = (agent_b.invoke(phase_b_context)).content
 
-    phase_b_response = strip_end_response(phase_b_response)
-
     reason, next_dir, target = parse_end_response(response=phase_b_response)
 
+    phase_b_response = strip_end_response(phase_b_response)
+
+    print(f"Step 1 Phase B Response: {phase_b_response}")
+
     return {
+        "current_step": 1,
         "retries": {
         **state['retries'],
         state['current_step']: state['retries'].get(state['current_step'], 0) + 1

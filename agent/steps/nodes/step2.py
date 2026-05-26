@@ -39,10 +39,12 @@ def run(state: AgentState) -> dict:
     response = (agent.invoke(context)).content
     reason, next_dir, target = parse_end_response(response=response) # Parse it to get details from The End Response Tag
     response = strip_end_response(response=response) # strip The End Response Tag
+    print(f"Step 2 Response: {response}")
 
     # Return and Write Everything to AgentState using LangGraph
 
     return {
+        "current_step": 2,
         "retries": {
         **state['retries'],
         state['current_step']: state['retries'].get(state['current_step'], 0) + 1

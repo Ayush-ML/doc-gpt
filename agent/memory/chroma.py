@@ -29,7 +29,7 @@ def write_memory(session_id: str, messages: list[dict], session_title: str) -> N
 
      collection = _get_chroma()
      ids = [f"{session_id}_{i}" for i in range(len(valid_messages))]
-     documents = [m.content for m in messages]
+     documents = [m.content for m in valid_messages]
      metadatas = [
         {
             "session_id": session_id,
@@ -38,17 +38,17 @@ def write_memory(session_id: str, messages: list[dict], session_title: str) -> N
             "index": i,
             "time": datetime.now()
         }
-        for i, m in enumerate(messages)
+        for i, m in enumerate(valid_messages)
     ]
      collection.add(ids=ids, documents=documents, metadatas=metadatas)
 
 # Create a Function in order to Retrieve Relevant Results
 
 def search(user_query: str, n_results: int = 5) -> list:
+    collection = _get_chroma()
     if collection.count() == 0:
         return []
 
-    collection = _get_chroma()
     results = collection.query(n_results=n_results, query_texts=[user_query])
     
     hits = []

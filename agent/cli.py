@@ -122,7 +122,7 @@ def init() -> None:
                     "provider": "",
                     "model": "",
                     "gatekeeper": "",
-                    "openrouter_api_key": "",
+                    "api_key": "",
                     "email": "",
                     "age": "",
                     "sex": ""
