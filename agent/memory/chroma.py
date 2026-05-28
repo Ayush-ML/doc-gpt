@@ -13,6 +13,7 @@ _collection = None
 # Create a Function to make a Persistent Client and Collection (done as a func so that it is not re ran every single import)
 
 def _get_chroma() -> chromadb.Collection:
+    global _client, _collection
     if _client is None and _collection is None:
         _client = chromadb.PersistentClient(path=user_chroma(ACTIVE_USER))
         _collection = _client.get_or_create_collection(name="agent")

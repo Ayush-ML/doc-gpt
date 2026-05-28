@@ -643,6 +643,7 @@ def _run_session(initial_state: AgentState) -> None:
                 ]
                 console.print("[green]Klini:[/] ", end="")
                 response = ""
+                clean = "Message Generation Failed"
                 try:
                     clean = "Message Generation Failed"
                     for chunk in agent.stream(context):
@@ -770,8 +771,8 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                     max_reached_step=1,
                     retries={},
                     messages=[HumanMessage(content=m['content']) if m['role'] == 'human' else AIMessage(content=m['content']) for m in session_data['messages']],
-                    end_response_reason="",
-                    requested_next="",
+                    end_response_reason="No Specific Reason",
+                    requested_next="forward",
                     requested_target_step=None,
                     all_skills={},
                     semantic_search=[],
@@ -779,7 +780,7 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                     skill_contents=[],
                     gatekeeper_decision=False,
                     gatekeeper_reason="",
-                    diagnosis_started=False,
+                    diagnosis_started=True,
                     ever_diagnosed=False
                 )
 
@@ -809,8 +810,8 @@ def start() -> None:
                     max_reached_step=1,
                     retries={},
                     messages=[],
-                    end_response_reason="",
-                    requested_next="",
+                    end_response_reason="No Specific Reason",
+                    requested_next="forward",
                     requested_target_step=None,
                     all_skills={},
                     semantic_search=[],

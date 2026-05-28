@@ -25,38 +25,40 @@ def run(state: AgentState) -> dict:
     clinical_profile = state['clinical_profile']
     sem_search = state['semantic_search']
     skill_contents = []
+    skills = []
 
     # Load Agent
 
     agent = get_agent()
-    agent_a = agent.bind_tools([web_search])
+    files = [f for f in Path(user_skills_dir(ACTIVE_USER)).iterdir() if f.is_file()]
+    if len(files) >= 1:
+        agent_a = agent
 
-    phase_a_user_message = f"Message History: {messages}, Skill Titles and Their Summaries: {all_skills}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {sem_search}"
+        phase_a_user_message = f"Message History: {messages}, Skill Titles and Their Summaries: {all_skills}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {sem_search}"
 
-    phase_a_context = [
-    SystemMessage(content=STEP_1_PHASE_A),
-    HumanMessage(content=phase_a_user_message)
-    ] # Build Context
+        phase_a_context = [
+        SystemMessage(content=STEP_1_PHASE_A),
+        HumanMessage(content=phase_a_user_message)
+        ] # Build Context
 
-    phase_a_response = agent_a.invoke(phase_a_context) # Get Response
+        phase_a_response = agent_a.invoke(phase_a_context) # Get Response
 
-    print(f"Step 1 Phase A Response: {phase_a_response.content}")
+        print(f"Step 1 Phase A Response: {phase_a_response.content}")
 
-    skills = [
-    line.strip() 
-    for line in phase_a_response.content.strip().splitlines()
-    if line.strip()
-    ] # Get Selected Skills
+        skills = [
+        line.strip() 
+        for line in phase_a_response.content.splitlines()
+        if line.strip()
+        ] # Get Selected Skills
 
-
-    for skill in skills:
-        skill_path = Path(user_skills_dir(ACTIVE_USER)) / f"{skill}.md"
-        try:
-            with open(skill_path, "r", encoding="utf-8") as file:
-                skill_contents.append(file.read())
-        except FileNotFoundError:
-            # skip missing skill files
-            continue # Get all Skill Contexts
+        for skill in skills:
+            skill_path = Path(user_skills_dir(ACTIVE_USER)) / f"{skill}.md"
+            try:
+                with open(skill_path, "r", encoding="utf-8") as file:
+                    skill_contents.append(file.read())
+            except FileNotFoundError:
+                # skip missing skill files
+                continue # Get all Skill Contexts
 
     agent_b = agent.bind_tools([web_search, pubmed, semantic_search])
 
