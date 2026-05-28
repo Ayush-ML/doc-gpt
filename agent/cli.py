@@ -695,7 +695,9 @@ def _run_session(initial_state: AgentState) -> None:
                         "session_title": session_title,
                         "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
                         "session_id": state['session_id'],
-                        "messages": [{"role": "human" if isinstance(m, HumanMessage) else "assistant", "content": m.content} for m in state['messages']]
+                        "messages": [{"role": "human" if isinstance(m, HumanMessage) else "assistant", "content": m.content} for m in state['messages']],
+                        "diagnosis_started": state['diagnosis_started'],
+                        "ever_diagnosed": state['ever_diagnosed']
                     }
                     
                     # Remove any existing session with the same session_id to avoid duplicates
@@ -780,8 +782,8 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                     skill_contents=[],
                     gatekeeper_decision=False,
                     gatekeeper_reason="",
-                    diagnosis_started=True,
-                    ever_diagnosed=False
+                    diagnosis_started=session_data.get('diagnosis_started', False),
+                    ever_diagnosed=session_data.get('ever_diagnosed', False)
                 )
 
                 _run_session(initial_state=state)
