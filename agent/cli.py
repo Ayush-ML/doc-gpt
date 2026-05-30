@@ -378,7 +378,7 @@ def register() -> None:
             f"  Name:      {name}\n"
             f"  Age:       {age}\n"
             f"  Sex:       {sex}\n"
-            f"  Provider:  OpenRouter\n"
+            f"  Provider:  {provider}\n"
             f"  Model:     {model}\n"
             f"  Profile:   {profile_path}",
             expand=False
