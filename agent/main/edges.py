@@ -27,16 +27,12 @@ def route_after_gatekeeper(state: AgentState) -> str:
         if attempts >= MAX_RETRIES:
             if current_step == 4:
                 return "profile_updater"
-            return f"step{next_step}"
+            return f"step{current_step + 1}"
         return f"step{current_step}"
 
     # Handle Gatekeeper Approval
     if approved:
         next_step = current_step + 1
-
-        # One step forward at a time
-        if next_step > max_reached + 1:
-            return f"step{current_step}"
 
         # If step 4 completed, go to updation nodes
         if current_step == 4:

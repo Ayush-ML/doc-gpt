@@ -667,7 +667,7 @@ def _run_session(initial_state: AgentState) -> None:
                 console.print("[green]Diagnosis Completed Successfully.[/]")
                 state = result
                 last_message = state['messages'][-1].content
-                console.print(f"[green]Klini:[/] {Markdown(last_message)}")
+                console.print(Markdown(last_message))
                 state['diagnosis_started'] = False
                 state['ever_diagnosed'] = True
         except IndexError:
