@@ -49,7 +49,6 @@ def run(state: AgentState) -> dict:
                     if isinstance(block, dict) and "text" in block
                 )
         if not phase_a_response == "None":
-            print(f"Step 1 Phase A Response: {phase_a_response}")
 
             skills = [
             line.strip() 
@@ -119,8 +118,6 @@ def run(state: AgentState) -> dict:
     reason, next_dir, target = parse_end_response(response=phase_b_response)
 
     phase_b_response = strip_end_response(phase_b_response)
-
-    print(f"Step 1 Phase B Response: {phase_b_response}")
 
     return {
         "current_step": 1,

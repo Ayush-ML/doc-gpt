@@ -40,7 +40,6 @@ def run(state: AgentState) -> dict:
                     if isinstance(block, dict) and "text" in block
                 )
     result = extract_gatekeeper_response(response.content)
-    print(f"Gatekeeper Response: {result}")
     return {
         "gatekeeper_decision": result.get('approved', False),
         "gatekeeper_reason": result.get('reason', 'No reason provided.')

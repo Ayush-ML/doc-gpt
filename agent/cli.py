@@ -358,7 +358,7 @@ def register() -> None:
 
         profile_path = profile_dir / "USER.md"
         profile_path.write_text(
-            f"# Patient Profile — {name}\n\n"
+            f"# Patient Profile - {name}\n\n"
             f"## Personal Information\n"
             f"Name: {name}\n"
             f"Age: {age}\n"
@@ -648,12 +648,17 @@ def _run_session(initial_state: AgentState) -> None:
                     clean = "Message Generation Failed"
                     for chunk in agent.stream(context):
                         chunk = chunk.content or ""
+                        if isinstance(chunk, list):
+                            chunk = " ".join(
+                                block.get("text", "") for block in chunk 
+                                if isinstance(block, dict) and "text" in block
+                            )
                         if "<DIAGNOSE/>" in chunk:
                             state['diagnosis_started'] = True
                             clean = chunk.replace("<DIAGNOSE/>", "").strip()
                         else:
                             clean = chunk.strip()
-                        console.print(f"{clean}\t", end="")
+                        console.print(Markdown(clean), end="")
                         response += clean
                 except Exception as e:
                     console.print(f"[red]An error occurred while streaming response: {e}[/]")
@@ -670,7 +675,7 @@ def _run_session(initial_state: AgentState) -> None:
                 console.print(Markdown(last_message))
                 state['diagnosis_started'] = False
                 state['ever_diagnosed'] = True
-        except IndexError:
+        except KeyboardInterrupt:
             console.print()
             console.print("[yellow]Session ended by user.[/]")
             if state['messages']:

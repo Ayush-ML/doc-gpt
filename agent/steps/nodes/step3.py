@@ -80,7 +80,6 @@ def run(state: AgentState) -> dict:
             break
     reason, next_dir, target = parse_end_response(response=response_content)
     response = strip_end_response(response=response_content)
-    print(f"Step 3 Response: {response}")
 
     # Return and Write Everything back to AgentState using LangGraph
 
