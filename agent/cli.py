@@ -664,13 +664,13 @@ def _run_session(initial_state: AgentState) -> None:
             elif state['diagnosis_started']:
                 with console.status("[green]Klini is diagnosing...[/]"):
                     result = graph.invoke(state, config={"configurable": {"thread_id": state['session_id']}})
-                console.print(f"[green]Klini[/] Diagnosis complete.")
+                console.print("[green]Diagnosis Completed Successfully.[/]")
                 state = result
                 last_message = state['messages'][-1].content
-                console.print(f"[green]Klini:[/] {last_message}")
+                console.print(f"[green]Klini:[/] {Markdown(last_message)}")
                 state['diagnosis_started'] = False
                 state['ever_diagnosed'] = True
-        except KeyboardInterrupt:
+        except IndexError:
             console.print()
             console.print("[yellow]Session ended by user.[/]")
             if state['messages']:
@@ -782,7 +782,7 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                     skill_contents=[],
                     gatekeeper_decision=False,
                     gatekeeper_reason="",
-                    diagnosis_started=session_data.get('diagnosis_started', False),
+                    diagnosis_started=session_data.get('diagnosis_started', True),
                     ever_diagnosed=session_data.get('ever_diagnosed', False)
                 )
 

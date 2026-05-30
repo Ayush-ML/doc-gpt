@@ -4,12 +4,12 @@
 
 from agent.steps.prompts import STEP_1_PHASE_A, PHASE_B_PROMPT
 from agent.main.state import AgentState
-from agent.utils import parse_end_response, strip_end_response
+from agent.utils import parse_end_response, strip_end_response, sanitize_filename
 from agent.main.router import get_agent
 from agent.tools.web_search import web_search
 from agent.tools.pubmed import pubmed
 from agent.tools.semantic_search import semantic_search
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
 from pathlib import Path
 from agent.config import user_skills_dir, ACTIVE_USER
 
@@ -42,23 +42,29 @@ def run(state: AgentState) -> dict:
         ] # Build Context
 
         phase_a_response = agent_a.invoke(phase_a_context) # Get Response
+        phase_a_response = phase_a_response.content if hasattr(phase_a_response, 'content') else str(phase_a_response)
+        if isinstance(phase_a_response, list):
+                phase_a_response = " ".join(
+                    block.get("text", "") for block in phase_a_response 
+                    if isinstance(block, dict) and "text" in block
+                )
+        if not phase_a_response == "None":
+            print(f"Step 1 Phase A Response: {phase_a_response}")
 
-        print(f"Step 1 Phase A Response: {phase_a_response.content}")
+            skills = [
+            line.strip() 
+            for line in phase_a_response.splitlines()
+            if line.strip()
+            ] # Get Selected Skills
 
-        skills = [
-        line.strip() 
-        for line in phase_a_response.content.splitlines()
-        if line.strip()
-        ] # Get Selected Skills
-
-        for skill in skills:
-            skill_path = Path(user_skills_dir(ACTIVE_USER)) / f"{skill}.md"
-            try:
-                with open(skill_path, "r", encoding="utf-8") as file:
-                    skill_contents.append(file.read())
-            except FileNotFoundError:
-                # skip missing skill files
-                continue # Get all Skill Contexts
+            for skill in skills:
+                skill_path = Path(user_skills_dir(ACTIVE_USER)) / f"{sanitize_filename(skill)}.md"
+                try:
+                    with open(skill_path, "r", encoding="utf-8") as file:
+                        skill_contents.append(file.read())
+                except FileNotFoundError:
+                    # skip missing skill files
+                    continue # Get all Skill Contexts
 
     agent_b = agent.bind_tools([web_search, pubmed, semantic_search])
 
@@ -69,7 +75,46 @@ def run(state: AgentState) -> dict:
     HumanMessage(content=phase_b_user_message)
     ] # Build Context
 
-    phase_b_response = (agent_b.invoke(phase_b_context)).content
+    # Agentic loop to execute tool calls
+    while True:
+        response = agent_b.invoke(phase_b_context)
+        phase_b_context.append(response)
+        
+        # Check if response has tool calls
+        if hasattr(response, 'tool_calls') and response.tool_calls:
+            # Execute each tool call
+            for tool_call in response.tool_calls:
+                tool_name = tool_call['type']
+                tool_input = tool_call.get('args', {})
+                
+                try:
+                    # Execute the appropriate tool
+                    if tool_name == 'web_search':
+                        tool_output = web_search.invoke(tool_input)
+                    elif tool_name == 'pubmed':
+                        tool_output = pubmed.invoke(tool_input)
+                    elif tool_name == 'semantic_search':
+                        tool_output = semantic_search.invoke(tool_input)
+                    else:
+                        tool_output = f"Unknown tool: {tool_name}"
+                except Exception as e:
+                    tool_output = f"Tool execution error: {str(e)}"
+                
+                # Add tool result to messages
+                tool_message = ToolMessage(
+                    content=str(tool_output),
+                    tool_call_id=tool_call.get('id', tool_name)
+                )
+                phase_b_context.append(tool_message)
+        else:
+            # No more tool calls, we have the final response
+            phase_b_response = response.content if hasattr(response, 'content') else str(response)
+            if isinstance(phase_b_response, list):
+                phase_b_response = " ".join(
+                    block.get("text", "") for block in phase_b_response 
+                    if isinstance(block, dict) and "text" in block
+                )
+            break
 
     reason, next_dir, target = parse_end_response(response=phase_b_response)
 

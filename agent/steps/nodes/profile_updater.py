@@ -29,6 +29,11 @@ def run(state: AgentState) -> dict:
     ]
 
     updated_profile = (agent.invoke(context)).content
+    if isinstance(updated_profile, list):
+                updated_profile = " ".join(
+                    block.get("text", "") for block in updated_profile
+                    if isinstance(block, dict) and "text" in block
+                )
 
     # write updated profile back to disk
     profile_path = user_profile(ACTIVE_USER)

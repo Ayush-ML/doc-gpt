@@ -15,15 +15,15 @@ def _google_genai(model: str) -> ChatGoogleGenerativeAI:
 
 
 def _openai(model: str) -> ChatOpenAI:
-    return ChatOpenAI(model_name=model, temperature=TEMPERATURE, openai_api_key=API_KEY)
+    return ChatOpenAI(model=model, temperature=TEMPERATURE, api_key=API_KEY)
 
 
 def _anthropic(model: str) -> ChatAnthropic:
-    return ChatAnthropic(model=model, temperature=TEMPERATURE, api_key=API_KEY)
+    return ChatAnthropic(model_name=model, temperature=TEMPERATURE, api_key=API_KEY, timeout=None, stop=None)
 
 
 def _cohere(model: str) -> ChatCohere:
-    return ChatCohere(model=model, temperature=TEMPERATURE, api_key=API_KEY)
+    return ChatCohere(model=model, temperature=TEMPERATURE, cohere_api_key=API_KEY)
 
 
 def _azure_openai(model: str) -> AzureChatOpenAI:
@@ -31,7 +31,7 @@ def _azure_openai(model: str) -> AzureChatOpenAI:
 
 
 def _mistral(model: str) -> ChatMistralAI:
-    return ChatMistralAI(model=model, temperature=TEMPERATURE, api_key=API_KEY)
+    return ChatMistralAI(name=model, temperature=TEMPERATURE, api_key=API_KEY)
 
 
 def _groq(model: str) -> ChatGroq:

@@ -70,3 +70,8 @@ def extract_gatekeeper_response(content):
         "approved": False,
         "reason": f"Could not parse gatekeeper response: {content}"
     }
+    
+# A function to clean Models Skill Selection
+
+def sanitize_filename(name: str) -> str:
+    return re.sub(r'[<>:"/\\|?*\[\]]', '', name).strip()

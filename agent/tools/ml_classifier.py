@@ -78,7 +78,13 @@ def classifier(symptoms: str) -> list[dict]:
         ]
 
         response = agent.invoke(messages)
-        raw = response.content.strip()
+        response = response.content if hasattr(response, 'content') else str(response)
+        if isinstance(response, list):
+                response = " ".join(
+                    block.get("text", "") for block in response 
+                    if isinstance(block, dict) and "text" in block
+                )
+        raw = response.strip()
 
         # Strip markdown fences if present
         if raw.startswith("```"):

@@ -34,6 +34,11 @@ def run(state: AgentState) -> dict:
     ]
 
     response = gatekeeper.invoke(messages)
+    if isinstance(response.content, list):
+                response.content = " ".join(
+                    block.get("text", "") for block in response.content
+                    if isinstance(block, dict) and "text" in block
+                )
     result = extract_gatekeeper_response(response.content)
     print(f"Gatekeeper Response: {result}")
     return {

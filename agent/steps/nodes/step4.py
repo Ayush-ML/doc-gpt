@@ -7,7 +7,7 @@ from agent.steps.prompts import STEP_4_PROMPT
 from agent.main.state import AgentState
 from agent.main.router import get_agent
 from agent.utils import strip_end_response, parse_end_response
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
 
 # Create the Run Function that handles the Node
 
@@ -26,17 +26,46 @@ def run(state: AgentState) -> dict:
     # Build Context for Agent
 
     user_message = f"Message History: {messages}, Selected Skill Contents: {skill_contents}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {semantic_search}"
-    context = context = [
-    SystemMessage(content=STEP_4_PROMPT),
-    HumanMessage(content=user_message)
-    ] # Build Context
+    messages_list = [
+        SystemMessage(content=STEP_4_PROMPT),
+        HumanMessage(content=user_message)
+    ]
 
-    # Get Agents Response
+    # Agentic loop
+    while True:
+        response = agent.invoke(messages_list)
+        messages_list.append(response)
+        
+        # Check if response has tool calls
+        if hasattr(response, 'tool_calls') and response.tool_calls:
+            # Execute each tool call
+            for tool_call in response.tool_calls:
+                tool_name = tool_call['type']
+                tool_input = tool_call.get('args', {})
+                
+                try:
+                    tool_output = f"Unknown tool: {tool_name}"
+                except Exception as e:
+                    tool_output = f"Tool execution error: {str(e)}"
+                
+                # Add tool result to messages
+                tool_message = ToolMessage(
+                    content=str(tool_output),
+                    tool_call_id=tool_call.get('id', tool_name)
+                )
+                messages_list.append(tool_message)
+        else:
+            # No more tool calls, we have the final response
+            response_content = response.content if hasattr(response, 'content') else str(response)
+            if isinstance(response_content, list):
+                response_content = " ".join(
+                    block.get("text", "") for block in response_content
+                    if isinstance(block, dict) and "text" in block
+                )
+            break
 
-    response = (agent.invoke(context)).content
-    reason, next_dir, target = parse_end_response(response=response) # Parse it to get details from The End Response Tag
-    response = strip_end_response(response=response) # strip The End Response Tag
-    print(f"Step 4 Response: {response}")
+    reason, next_dir, target = parse_end_response(response=response_content)
+    response = strip_end_response(response=response_content)
 
     # Return and Write Everything back to AgentState using LangGraph
 

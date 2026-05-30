@@ -9,7 +9,8 @@ from agent.main.router import get_agent
 from agent.main.state import AgentState
 from agent.steps.prompts import STEP_2_PROMPT
 from agent.utils import strip_end_response, parse_end_response
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
+import json
 
 # Create The Run function that is passed to LangGraph and handles the flow of the Second Node
 
@@ -29,19 +30,56 @@ def run(state: AgentState) -> dict:
     # Design The Models Context
 
     user_message = f"Message History: {messages}, Selected Skill Contents: {skill_contents}, Clinical Profile of the user: {clinical_profile}, Semantic Search Results for the Users Query: {sem_search}"
-    context = [
-    SystemMessage(content=STEP_2_PROMPT),
-    HumanMessage(content=user_message)
-    ] # Build Context
+    messages_list = [
+        SystemMessage(content=STEP_2_PROMPT),
+        HumanMessage(content=user_message)
+    ]
 
-    # Get Models Response
-
-    response = (agent.invoke(context)).content
-    reason, next_dir, target = parse_end_response(response=response) # Parse it to get details from The End Response Tag
-    response = strip_end_response(response=response) # strip The End Response Tag
+    # Agentic loop to execute tool calls and gather data
+    while True:
+        response = agent.invoke(messages_list)
+        messages_list.append(response)
+        
+        # Check if response has tool calls
+        if hasattr(response, 'tool_calls') and response.tool_calls:
+            # Execute each tool call
+            for tool_call in response.tool_calls:
+                tool_name = tool_call['name']
+                tool_input = tool_call.get('args', {})
+                
+                try:
+                    # Execute the appropriate tool
+                    if tool_name == 'classifier':
+                        tool_output = classifier.invoke(tool_input)
+                    elif tool_name == 'drug_lookup':
+                        tool_output = drug_lookup.invoke(tool_input)
+                    elif tool_name == 'semantic_search':
+                        tool_output = semantic_search.invoke(tool_input)
+                    else:
+                        tool_output = f"Unknown tool: {tool_name}"
+                except Exception as e:
+                    tool_output = f"Tool execution error: {str(e)}"
+                
+                # Add tool result to messages
+                tool_message = ToolMessage(
+                    content=str(tool_output),
+                    tool_call_id=tool_call.get('id', tool_name)
+                )
+                messages_list.append(tool_message)
+        else:
+           response_content = response.content if hasattr(response, 'content') else str(response)
+           if isinstance(response_content, list):
+                response_content = " ".join(
+                    block.get("text", "") for block in response_content
+                    if isinstance(block, dict) and "text" in block
+                )
+           break
+        
+    reason, next_dir, target = parse_end_response(response=response_content)
+    response = strip_end_response(response=response_content)
     print(f"Step 2 Response: {response}")
 
-    # Return and Write Everything to AgentState using LangGraph
+    # Return and Write Everything back to AgentState using LangGraph
 
     return {
         "current_step": 2,
@@ -53,8 +91,9 @@ def run(state: AgentState) -> dict:
             state['max_reached_step'],
             state['current_step']
         ),
-        "end_response_reason": reason,
         "requested_next": next_dir,
         "requested_target_step": target,
+        "end_response_reason": reason,
         "messages": [AIMessage(content=response)] # Append The models response to Messages
     }
+            

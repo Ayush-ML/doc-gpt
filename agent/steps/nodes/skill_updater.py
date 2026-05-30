@@ -53,10 +53,15 @@ def run(state: AgentState) -> dict:
 
     # Get Response from Agent
     response = (agent.invoke(context)).content
+    if isinstance(response, list):
+                response_content = " ".join(
+                    block.get("text", "") for block in response
+                    if isinstance(block, dict) and "text" in block
+                )
 
     # Parse Skills and make File Containing Skills
 
-    skill = _parse_response(response=response)
+    skill = _parse_response(response=response_content)
     if skill:
         title = skill["title"]
         summary = skill["summary"]
