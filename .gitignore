@@ -1,4 +1,3 @@
-.env
-.png
-.txt
-__pychache__
+**/__pychache__/
+__init__.py
+klini.egg-info/
