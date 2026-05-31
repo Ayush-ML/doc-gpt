@@ -2,3 +2,4 @@
 *.pyc
 klini.egg-info/
 .klini/
+dist/

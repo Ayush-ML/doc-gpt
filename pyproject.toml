@@ -46,9 +46,9 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/Ayush-ML"
-Repository = "https://github.com/Ayush-ML/doc-gpt"
-Documentation = "https://github.com/Ayush-ML/doc-gpt#readme"
-Bug Tracker = "https://github.com/Ayush-ML/doc-gpt/issues"
+Repository = "https://github.com/Ayush-ML/klini"
+Documentation = "https://github.com/Ayush-ML/klini#readme"
+Bug_Tracker = "https://github.com/Ayush-ML/klini/issues"
 
 [project.scripts]
 klini = "agent.cli:app"

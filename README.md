@@ -149,15 +149,11 @@ This makes `klini` particularly useful for:
 
 - Python 3.11+
 - `pip`
-- Optional: Ollama if you want local LLM inference with no cloud API key
-- Optional: Access to OpenRouter for cloud model execution
 
-### Install from repository
+### Install from PyPi
 
 ```bash
-git clone https://github.com/Ayush-ML/doc-gpt.git
-cd klini
-pip install -e .
+pip install klini
 ```
 
 ### First-time setup
