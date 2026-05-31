@@ -1,322 +1,492 @@
 <div align="center">
 
-![Project Banner](./assets/banner.png)
+![Project Banner](assets/banner.png)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![LangGraph](https://img.shields.io/badge/Built%20with-LangGraph-blueviolet?style=for-the-badge)](https://github.com/langchain-ai/langgraph)
-[![Ollama](https://img.shields.io/badge/Runs%20on-Ollama-black?style=for-the-badge)](https://ollama.ai)
+# klini
 
 **A self-learning clinical diagnosis agent that runs entirely in your terminal.**
 
-No frontend. No browser. No server. Describe your symptoms, and klini walks you through a four-step diagnostic pipeline — analysis, data scoring, evidence verification, and a final patient report — backed by real clinical tools and peer-reviewed literature. After every session it writes a skill file and embeds the conversation into a local vector database so it gets sharper the more you use it.
-
-[Installation](#installation) · [Usage](#usage) · [How it works](#how-it-works) · [Configuration](#configuration) · [Architecture](#architecture)
-
 </div>
 
----
-
-## Overview
-
-|  |  |
-| --- | --- |
-| **Four-step diagnostic pipeline** | Analysis → data scoring → evidence verification → final report. Each step builds on the last. A gatekeeper LLM runs between every step and must approve the response before the agent can proceed. |
-| **Structured skepticism** | The verification step is explicitly tasked with challenging and refuting claims from earlier steps using PubMed and web evidence — not confirming them. |
-| **Self-learning memory** | After every session, klini writes a skill file to disk and embeds the full session into ChromaDB. Future sessions load relevant skills automatically and search past cases semantically. |
-| **Multi-user support** | Each user gets their own isolated profile, session history, skill library, and vector memory. Switch between users with a single command. |
-| **Runs locally or in the cloud** | Use Ollama with small quantized models (phi3:mini, gemma2:2b) on a CPU-only machine with no API key, or switch to OpenRouter for access to hundreds of cloud models with a single key. |
-| **Real clinical tools** | DuckDuckGo web search, PubMed literature lookup, OpenFDA drug information, and Infermedica ML symptom classification — all free or free-tier, no extra accounts required beyond setup. |
-| **Persistent patient profile** | A `USER.md` file tracks clinical history, medications, allergies, and family history across sessions. Updated automatically after every session with newly confirmed information. |
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE) [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge&logo=python&logoColor=white)](https://python.org) [![LangGraph](https://img.shields.io/badge/Built%20with-LangGraph-blueviolet?style=for-the-badge)](https://github.com/langchain-ai/langgraph)
 
 ---
 
-## Installation
+## Table of Contents
 
-**Prerequisites:** Python 3.11+, and either [Ollama](https://ollama.ai) (local, no API key) or an [OpenRouter](https://openrouter.ai) API key (cloud).
-
-```bash
-git clone https://github.com/Ayush-ML/klini
-cd klini
-pip install -e .
-```
-
-Run first-time setup:
-
-```bash
-klini init
-```
-
-This creates `.klini/` with the required directory structure, initializes your user folder, and prompts you for your username.
-
-Then register your profile and configure the agent:
-
-```bash
-klini register
-```
-
-This collects your personal information (name, age, sex), provider settings, API keys, and Infermedica credentials, and writes them to your user config.
-
-> **Ollama users:** Pull a model before your first session — `ollama pull phi3:mini`. klini works on CPU with no GPU required.
+1. [Project Overview](#project-overview)
+2. [Key Features](#key-features)
+3. [Why `klini` Exists](#why-klini-exists)
+4. [Architecture](#architecture)
+5. [Installation](#installation)
+6. [Quick Start](#quick-start)
+7. [Command Reference](#command-reference)
+8. [How the Diagnostic Pipeline Works](#how-the-diagnostic-pipeline-works)
+9. [Memory, Skills, and Learning](#memory-skills-and-learning)
+10. [Supported Providers and Tooling](#supported-providers-and-tooling)
+11. [Configuration](#configuration)
+12. [Project Structure](#project-structure)
+13. [Contributing](#contributing)
+14. [Security and Safety](#security-and-safety)
+15. [License](#license)
+16. [What to Add](#what-to-add)
 
 ---
 
-## Usage
+## Project Overview
 
-### Starting a session
+`klini` is a CLI-first, terminal-native clinical reasoning assistant designed to support conversational intake and structured medical analysis in a local environment.
 
-```bash
-klini start                        # start a new session with the active user
-```
+It is built for:
+- clinicians and healthcare-focused developers who want a command-line clinical workflow
+- users who need a self-contained system without frontend or browser dependencies
+- those who want incremental learning behavior through local memory and skills
 
-klini opens a free-form conversation where it asks clarifying questions and builds clinical context. When it has gathered enough information it automatically emits a `<DIAGNOSE/>` signal and begins the formal diagnostic pipeline — no command needed.
-
-### Sessions
-
-```bash
-klini sessions                          # list all past sessions
-klini sessions "session title"          # resume a specific session
-```
-
-Resuming a session replays the full conversation history and continues from where you left off.
-
-### Skills
-
-```bash
-klini skills                            # list all learned skills with summaries
-klini skills "skill title"              # display the full content of a skill
-```
-
-### Profile
-
-```bash
-klini profile                           # view your clinical profile (USER.md)
-```
-
-### Users
-
-```bash
-klini users                             # list all registered users
-klini set --key user --value john       # switch the active user
-```
-
-### Configuration
-
-```bash
-klini config                            # view all current config values
-
-klini set --key provider --value ollama          # switch to local inference
-klini set --key provider --value openrouter      # switch to cloud inference
-klini set --key model --value phi3:mini          # change the active model
-klini set --key gatekeeper --value phi3:mini     # change the gatekeeper model
-klini set --key openrouter_api_key --value sk-or-...
-klini set --key age --value 25
-klini set --key sex --value male
-```
-
-### Deleting data
-
-```bash
-klini delete --mode session --name "session title"   # delete a specific session
-klini delete --mode skill --name "skill title"        # delete a specific skill
-klini delete --mode user --name john                  # delete a user and all their data
-klini delete --mode all                               # wipe everything and reset to fresh state
-```
+`klini` is not a replacement for licensed medical professionals. It is an AI-assisted clinical reasoning companion meant for structured exploratory workflows, hypothesis generation, and evidence-backed diagnostic reasoning.
 
 ---
 
-## How it works
+## Key Features
 
-### Pre-session conversation
+- **Terminal-native UX**
+  - 100% command-line interface
+  - No frontend, no browser, no remote server required
 
-Before the pipeline begins, klini runs a free-form conversation loop to gather symptoms and clinical context. When it determines it has enough information it emits `<DIAGNOSE/>` and the LangGraph pipeline starts — with the full conversation already loaded into state.
+- **Four-step clinical pipeline**
+  - Analysis
+  - Data scoring
+  - Evidence verification
+  - Final patient report
 
-### The pipeline
+- **Gatekeeper supervision**
+  - Every pipeline step is reviewed by a quality gate
+  - Ensures safety, completeness, and clinical relevance
 
-```
-Preprocess ─────────────────────────────────────────────────────────────────
-  Load skill index · Read patient profile · Semantic search past sessions
-  │
-  ▼
-Step 1 · Analysis ──────────────────────────────────────────────────────────
-  Phase A: select relevant skill files from index
-  Phase B: candidate conditions, red flags, information gaps
-  Tools: web_search · semantic_search
-  │
-[Gatekeeper]
-  │
-  ▼
-Step 2 · Data ──────────────────────────────────────────────────────────────
-  ML probability scores · Drug interaction analysis · Past session comparison
-  Tools: ml_classifier · drug_lookup · semantic_search
-  │
-[Gatekeeper]
-  │
-  ▼
-Step 3 · Verification ──────────────────────────────────────────────────────
-  Every claim from Steps 1–2 challenged with external evidence
-  Every condition requires at least one PubMed search
-  Tools: web_search · pubmed · drug_lookup · semantic_search
-  │
-[Gatekeeper]
-  │
-  ▼
-Step 4 · Diagnosis ─────────────────────────────────────────────────────────
-  Final report written directly to the patient
-  Primary diagnosis · differentials · red flags · recommended next steps
-  No tools — pure synthesis of all prior steps
-  │
-[Gatekeeper]
-  │
-  ├── Profile Updater ─── rewrites USER.md with newly confirmed clinical info
-  │
-  └── Skill Writer ─────── writes skill.md · updates index.jsonl · embeds session to ChromaDB
-```
+- **Local self-learning memory**
+  - Session embeddings stored in ChromaDB
+  - Learned skills stored as local markdown files
+  - Future sessions retrieve relevant experience automatically
 
-### The gatekeeper
+- **Multi-user support**
+  - User-specific profiles, sessions, skills, and vector memory
+  - Supports multiple clinician or patient identities within one installation
 
-A separate, smaller LLM call runs between every step. It reads the agent's response and the reason it gave for ending, then returns an `approved` boolean with an explanation. If rejected, the agent retries up to `MAX_RETRIES` times before being forced forward. The agent can request to go back any number of steps at any time — backward movement is always approved without a gatekeeper check.
+- **Flexible model support**
+  - Local inference via Ollama-compatible models
+  - Cloud inference via OpenRouter and multiple provider adapters
+  - Pluggable provider abstraction for Ollama, Google, OpenAI, Anthropic, Cohere, Mistral, Groq, and Azure
 
-### Self-learning loop
+- **Clinical tool integration**
+  - Drug lookup
+  - PubMed literature search
+  - Web search
+  - Symptom classifier
+  - Semantic retrieval over prior sessions
 
-```
-Session ends
-  └─ profile_updater   updates USER.md with confirmed new information
-  └─ skill_writer      writes skill.md capturing diagnostic patterns learned
-  └─ skill_writer      embeds the full session into ChromaDB
-
-Next session
-  └─ preprocess        loads updated skill index — new skill is available
-  └─ preprocess        searches ChromaDB — this session is now searchable
-  └─ Step 1            selects and reads relevant skills before analysis begins
-```
-
-Every session produces a skill file covering clinical patterns, diagnostic approach, key findings, common pitfalls, and verified evidence. The skill index grows over time, and the agent's reasoning improves for conditions it has encountered before.
+- **Structured clinical output**
+  - Candidate conditions
+  - Red flag identification
+  - Test and investigation recommendations
+  - Evidence-backed final report
 
 ---
 
-## Tools
+## Why `klini` Exists
 
-Each pipeline step binds only the tools it is permitted to use. Tool results flow back into the conversation as standard LangChain tool messages in a standard ReAct loop.
+The modern clinical decision support landscape often depends on web apps, dashboards, and proprietary systems. `klini` was created to deliver a lightweight, terminal-based alternative that:
 
-| Tool | Source | API key |
-|------|--------|---------|
-| Web search | DuckDuckGo | None |
-| Literature search | PubMed via LangChain | Email address only |
-| Drug information | OpenFDA | None |
-| Symptom classification | Infermedica | Free tier · 100 calls/day |
-| Semantic search | ChromaDB (local, embedded) | None |
+- keeps patient context local
+- scales from a laptop to a remote VM
+- supports operators who favor CLI workflows
+- enables experimentation with custom clinical pipelines
+- preserves auditability through plain-text session and skill artifacts
 
----
-
-## Configuration
-
-Provider and model are set with `klini set` and stored per-user in `.klini/users/{name}/config.toml`.
-
-**Ollama — local, private, CPU-friendly**
-
-```bash
-ollama pull phi3:mini              # or gemma2:2b, llama3.2:3b, etc.
-klini set --key provider --value ollama
-klini set --key model --value phi3:mini
-```
-
-No API key. No data leaves your machine. Works on any laptop.
-
-**OpenRouter — cloud, hundreds of models**
-
-```bash
-klini set --key provider --value openrouter
-klini set --key model --value mistralai/mistral-7b-instruct
-klini set --key openrouter_api_key --value sk-or-...
-```
-
-Free-tier models available. Full list at [openrouter.ai/models](https://openrouter.ai/models).
+This makes `klini` particularly useful for:
+- clinician-developers prototyping AI-assisted workflows
+- research teams building explainable prompt pipelines
+- educators teaching structured reasoning with LLMs
+- health-tech builders wanting a self-contained proof of concept
 
 ---
 
 ## Architecture
 
-```
-agent/
-├── config.py               configuration, paths, API keys
-├── cli.py                  all CLI commands (Typer)
-├── utils.py                shared helpers
-├── main/
-│   ├── state.py            AgentState TypedDict — single source of truth
-│   ├── router.py           LLM factory, returns correct client based on config
-│   ├── graph.py            builds and compiles the LangGraph StateGraph
-│   └── edges.py            routing logic after each gatekeeper decision
-├── nodes/
-│   ├── preprocess.py       loads skills, patient profile, ChromaDB results
-│   ├── step1.py            analysis — two-phase LLM execution
-│   ├── step2.py            data — ML classification and drug analysis
-│   ├── step3.py            verification — evidence-based claim checking
-│   ├── step4.py            diagnosis — final patient report
-│   ├── gatekeeper.py       quality gate between every step
-│   ├── profile_updater.py  rewrites USER.md after session ends
-│   └── skill_writer.py     writes skill file, updates index, embeds to ChromaDB
-├── tools/
-│   ├── web_search.py       DuckDuckGo
-│   ├── pubmed.py           PubMed via LangChain
-│   ├── semantic_search.py  ChromaDB keyword search
-│   ├── drug_lookup.py      OpenFDA
-│   └── ml_classifier.py   Infermedica symptom classification
-├── steps/
-│   └── prompts.py          system prompts for all nodes
-└── memory/
-    └── chroma.py           ChromaDB client — write and search functions
+### High-level design
+
+`klini` is organized into the following logical layers:
+
+- `agent/cli.py`
+  - CLI entrypoint built with `Typer`
+  - Exposes commands for init, register, start, sessions, skills, profile, config, set, delete, and more
+
+- `agent/config.py`
+  - Defines directory layout and user-specific config objects
+  - Loads active user, provider settings, model names, API keys, and clinical metadata
+
+- `agent/main/router.py`
+  - Abstracts the LLM provider layer
+  - Supports multiple providers through a single unified interface
+
+- `agent/main/state.py`
+  - Captures session state, pipeline progress, tool results, gatekeeper decisions, and control flags
+
+- `agent/steps/prompts.py`
+  - Houses the structured prompt templates for Step 1, Step 2, Step 3, and the gatekeeper
+  - Contains strict response formats and approval requirements
+
+- `agent/main/graph.py`
+  - Orchestrates the reasoning pipeline using LangGraph
+  - Connects nodes, steps, and tool integration
+
+- `agent/tools/*`
+  - Encapsulates all external data sources and tool wrappers
+
+---
+
+## Installation
+
+### Prerequisites
+
+- Python 3.11+
+- `pip`
+- Optional: Ollama if you want local LLM inference with no cloud API key
+- Optional: Access to OpenRouter for cloud model execution
+
+### Install from repository
+
+```bash
+git clone https://github.com/Ayush-ML/doc-gpt.git
+cd klini
+pip install -e .
 ```
 
-**Data storage** — all persistent data lives under `.klini/`:
+### First-time setup
 
-```
-.klini/
-├── config.toml                          active user
-└── users/
-    └── {username}/
-        ├── config.toml                  provider, model, keys, personal info
-        ├── USER.md                      patient clinical profile
-        ├── history.json                 session history
-        ├── skills/
-        │   ├── index.jsonl              one line per skill: { title, summary }
-        │   ├── chest_pain_differential.md
-        │   └── diabetic_ketoacidosis_workup.md
-        └── memory/
-            ├── chroma/                  ChromaDB vector store
-            └── checkpoint.db            LangGraph session checkpoints (SQLite)
+```bash
+klini init
+klini register
 ```
 
-**Stack**
+`klini init` creates the following local runtime structure:
+- `.klini/app_config.toml`
+- `.klini/users/<username>/user_config.toml`
+- `.klini/users/<username>/history.json`
+- `.klini/users/<username>/skills/index.jsonl`
+- `.klini/users/<username>/memory/chroma`
 
-| Component | Library |
-|-----------|---------|
-| Agent framework | LangGraph |
-| LLM clients | LangChain — ChatOllama, ChatOpenAI |
-| CLI | Typer + Rich |
-| Vector database | ChromaDB (embedded, no server) |
-| Session checkpoints | SQLite via LangGraph |
+> If you are using Ollama for local inference, run `ollama pull <model>` before starting your first session.
+
+`klini register` collects:
+- username
+- age
+- sex
+- provider settings
+- model choices
+- API token(s)
+- any additional profile metadata
+
+---
+
+## Quick Start
+
+### Start a session
+
+```bash
+klini start
+```
+
+The agent enters an interactive session, gathers symptoms and clinical history, then transitions into the structured 4-step diagnostic pipeline automatically.
+
+### List sessions
+
+```bash
+klini sessions
+```
+
+### Resume a session
+
+```bash
+klini sessions "session title"
+```
+
+### List learned skills
+
+```bash
+klini skills
+```
+
+### View user profile
+
+```bash
+klini profile
+```
+
+---
+
+## Command Reference
+
+### `klini init`
+Initializes the `.klini` workspace and user directories.
+
+### `klini register`
+Populates the active user's configuration and clinical metadata.
+
+### `klini start`
+Begins a new diagnostic session.
+
+### `klini sessions`
+Lists and optionally resumes previous sessions.
+
+### `klini skills`
+Lists available skills or shows skill details.
+
+### `klini profile`
+Displays the current `USER.md` patient profile.
+
+### `klini config`
+Shows current configuration values for the active user.
+
+### `klini set`
+Updates configuration values such as provider, model, gatekeeper, API key, and user metadata.
+
+Example:
+
+```bash
+klini set --key provider --value ollama
+klini set --key model --value phi3:mini
+klini set --key gatekeeper --value phi3:mini
+klini set --key openrouter_api_key --value sk-or-...
+klini set --key age --value 32
+```
+
+### `klini delete`
+Deletes a session, skill, user, or the entire local workspace.
+
+Examples:
+
+```bash
+klini delete --mode session --name "session title"
+klini delete --mode skill --name "skill title"
+klini delete --mode user --name john
+klini delete --mode all
+```
+
+---
+
+## How the Diagnostic Pipeline Works
+
+`klini` follows a rigid four-step clinical reasoning pipeline, each with a dedicated role and approval workflow.
+
+### Step 1 - Analysis
+
+- Performs the first clinical review
+- Summarizes the patient presentation
+- Breaks down symptoms
+- Generates candidate conditions
+- Identifies red flags
+- Lists gaps in the clinical picture
+
+### Step 2 - Data
+
+- Scores candidate conditions with an ML classifier
+- Assesses medications and drug interactions
+- Searches prior sessions for relevant history
+- Updates condition likelihoods based on data evidence
+
+### Step 3 - Verification
+
+- Verifies every condition with external evidence
+- Uses PubMed, web search, and drug tools
+- Confirms or challenges prior assumptions
+- Refines differential diagnoses
+
+### Step 4 - Diagnosis
+
+- Produces the final clinical summary
+- Recommends next steps and safety guidance
+- Provides differential diagnoses
+- Includes an AI-assisted disclaimer
+
+### Gatekeeper oversight
+
+A smaller, specialized LLM evaluates the output after each step to ensure:
+- clinical completeness
+- safety
+- required content
+- adherence to the correct reasoning format
+
+The gatekeeper can approve, reject, or request revisions. It also allows backward movement when the agent decides it must revisit prior steps.
+
+---
+
+## Memory, Skills, and Learning
+
+`klini` is built to learn from every session.
+
+### Skill files
+
+- Each completed session can produce a skill file
+- Skill files capture patterns, reasoning, and verified evidence
+- Stored under `.klini/users/<username>/skills/`
+- Indexed in `index.jsonl`
+
+### Vector memory
+
+- Session transcripts are embedded into ChromaDB
+- Local vector memory lives under `.klini/users/<username>/memory/chroma`
+- Past sessions are searched semantically to inform future reasoning
+
+### User profile persistence
+
+- `USER.md` stores active clinical profile content
+- Automatically updated with confirmed history, medications, allergies, and family history after each session
+
+---
+
+## Supported Providers and Tooling
+
+`klini` supports a broad provider layer through `langchain` adapters:
+
+- Ollama
+- Google GenAI
+- OpenAI
+- Azure OpenAI
+- Anthropic
+- Cohere
+- Mistral
+- Groq
+
+### Core dependencies
+
+- `typer`
+- `rich`
+- `langchain`
+- `langchain-core`
+- `langchain-community`
+- `langgraph`
+- `chromadb`
+- `requests`
+- `tomli-w`
+
+### Tools currently used by the pipeline
+
+- `classifier`
+- `drug_lookup`
+- `semantic_search`
+- `pubmed`
+- `web_search`
+
+These tools are integrated to provide:
+- probability scoring
+- drug safety checks
+- evidence retrieval
+- past case recall
+
+---
+
+## Configuration
+
+`klini` keeps config in TOML files under `.klini/`.
+
+### Global app config
+- `.klini/app_config.toml`
+- stores the active user
+
+### User config
+- `.klini/users/<username>/user_config.toml`
+- stores provider, model, gatekeeper, API keys, email, age, sex, and other per-user settings
+
+### User profile
+- `.klini/users/<username>/USER.md`
+- stores ongoing patient profile and confirmed data
+
+### Session history
+- `.klini/users/<username>/history.json`
+- tracks past sessions and metadata
+
+---
+
+## Project Structure
+
+```text
+klini/
++-- LICENSE
++-- pyproject.toml
++-- README.md
++-- agent/
+-   +-- __init__.py
+-   +-- cli.py
+-   +-- config.py
+-   +-- utils.py
+-   +-- main/
+-   -   +-- __init__.py
+-   -   +-- edges.py
+-   -   +-- graph.py
+-   -   +-- router.py
+-   -   +-- state.py
+-   +-- memory/
+-   -   +-- __init__.py
+-   -   +-- chroma.py
+-   +-- steps/
+-   -   +-- __init__.py
+-   -   +-- prompts.py
+-   -   +-- nodes/
+-   -   -   +-- gatekeeper.py
+-   -   -   +-- preprocess.py
+-   -   -   +-- profile_updater.py
+-   -   -   +-- skill_updater.py
+-   -   -   +-- step1.py
+-   -   -   +-- step2.py
+-   -   -   +-- step3.py
+-   -   -   +-- step4.py
+-   +-- tools/
+-   -   +-- __init__.py
+-   -   +-- drug_lookup.py
+-   -   +-- ml_classifier.py
+-   -   +-- pubmed.py
+-   -   +-- semantic_search.py
+-   -   +-- web_search.py
++-- assets/
+-   +-- banner.png
+```
 
 ---
 
 ## Contributing
 
-Pull requests are welcome. For significant changes, please open an issue first.
+Contributions are welcome and encouraged. Recommended areas of contribution include:
 
-```bash
-git clone https://github.com/Ayush-ML/klini
-cd klini
-pip install -e ".[dev]"
-```
+- improving the diagnostic prompt templates
+- expanding supported tool integrations
+- adding support for additional inference providers
+- improving session persistence and memory retrieval
+- enhancing the CLI experience
+- adding automated tests and CI validation
+
+If you want to contribute:
+1. fork the repository
+2. create a feature branch
+3. open a pull request with a clear description
 
 ---
 
-## Disclaimer
+## Security and Safety
 
-klini is an AI-assisted tool intended to support clinical reasoning. It is **not** a substitute for professional medical advice, diagnosis, or treatment. Never disregard or delay seeking professional medical advice based on output from this tool. Always consult a qualified healthcare provider.
+`klini` is explicitly designed as an AI-assisted reasoning tool, not a medical device.
+
+Important safety principles:
+- do not use for final clinical decision-making
+- always verify with licensed providers
+- never rely on it for medication dosing
+- avoid using it with real patient identifiers unless your environment is HIPAA-compliant
+- treat outputs as advisory and educational
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+`klini` is released under the **MIT License**.
+
+See `LICENSE` for full terms.
+
+---

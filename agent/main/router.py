@@ -8,11 +8,14 @@ from langchain_anthropic import ChatAnthropic
 from langchain_cohere import ChatCohere
 from langchain_mistralai import ChatMistralAI
 from langchain_groq import ChatGroq
+from langchain_ollama import ChatOllama
 from agent.config import PROVIDER, AGENT, GATEKEEPER, API_KEY, TEMPERATURE
 
 def _google_genai(model: str) -> ChatGoogleGenerativeAI:
     return ChatGoogleGenerativeAI(model=model, temperature=TEMPERATURE, google_api_key=API_KEY)
 
+def _ollama(model: str) -> ChatOllama:
+    return ChatOllama(model=model, temperature=TEMPERATURE, timeout=None)
 
 def _openai(model: str) -> ChatOpenAI:
     return ChatOpenAI(model=model, temperature=TEMPERATURE, api_key=API_KEY)
@@ -31,7 +34,7 @@ def _azure_openai(model: str) -> AzureChatOpenAI:
 
 
 def _mistral(model: str) -> ChatMistralAI:
-    return ChatMistralAI(name=model, temperature=TEMPERATURE, api_key=API_KEY)
+    return ChatMistralAI(model_name=model, temperature=TEMPERATURE, api_key=API_KEY)
 
 
 def _groq(model: str) -> ChatGroq:
@@ -47,6 +50,7 @@ def _get_model(model: str) -> Any:
         'azure': _azure_openai,
         'mistral': _mistral,
         'groq': _groq,
+        'ollama': _ollama
     }
     if PROVIDER not in providers:
         raise ValueError(f"Unknown provider: '{PROVIDER}'. Choose from: {list(providers.keys())}")

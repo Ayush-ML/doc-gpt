@@ -4,10 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "klini"
-version = "0.1.0"
+version = "0.2.0"
 description = "A self-learning clinical diagnosis agent that runs entirely in your terminal."
 readme = "README.md"
 requires-python = ">=3.11"
+license = { file = "LICENSE" }
+keywords = ["clinical", "diagnosis", "healthcare", "AI", "LLM", "CLI", "langchain", "self-learning"]
 authors = [
   { name = "Ayush-ML" }
 ]
@@ -35,6 +37,7 @@ dependencies = [
     "langchain-cohere>=0.2.0",
     "langchain-mistralai>=0.2.0",
     "langchain-groq>=0.2.0",
+    "langchain-ollama>=0.2.0",
     "langgraph>=0.2.0",
     "chromadb>=0.5.0",
     "tomli-w>=1.0.0",
@@ -45,6 +48,7 @@ dependencies = [
 Homepage = "https://github.com/Ayush-ML"
 Repository = "https://github.com/Ayush-ML/doc-gpt"
 Documentation = "https://github.com/Ayush-ML/doc-gpt#readme"
+Bug Tracker = "https://github.com/Ayush-ML/doc-gpt/issues"
 
 [project.scripts]
 klini = "agent.cli:app"

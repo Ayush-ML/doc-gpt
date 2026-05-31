@@ -289,13 +289,16 @@ def register() -> None:
         console.print("    [green]• mixtral-8x7b-32768[/]")
         console.print("    [green]• deepseek-r1-distill-llama-70b[/]")
         console.print()
+    
+        console.print("[cyan]- ollama[/]")
+        console.print()
 
         # Provider
         console.print("  The provider is the company that provides the language model API.")
         console.print()
         while True:
             provider = console.input("  Model Provider: ").strip().lower()
-            if provider in ['google', 'openai', 'anthropic', 'cohere', 'azure', 'mistral', 'groq']:
+            if provider in ['google', 'openai', 'anthropic', 'cohere', 'azure', 'mistral', 'groq', 'ollama']:
                 break
             else:
                 console.print("  [red]Currently, only 'google' and 'openai' are supported as model providers.[/]")
@@ -693,6 +696,11 @@ def _run_session(initial_state: AgentState) -> None:
                     ]
                     try:
                         session_title = (agent.invoke(context)).content
+                        if isinstance(session_title, list):
+                            session_title = " ".join(
+                                block.get("text", "") for block in session_title
+                                if isinstance(block, dict) and "text" in block
+                            )
                     except Exception as e:
                         console.print(f"[red]An error occurred while generating session title: {e}[/]")
                         session_title = "Untitled Session"
