@@ -787,7 +787,7 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                     retries={},
                     messages=[HumanMessage(content=m['content']) if m['role'] == 'human' else AIMessage(content=m['content']) for m in session_data['messages']],
                     end_response_reason="No Specific Reason",
-                    requested_next="forward",
+                    requested_next="",
                     requested_target_step=None,
                     all_skills={},
                     semantic_search=[],
@@ -795,8 +795,8 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                     skill_contents=[],
                     gatekeeper_decision=False,
                     gatekeeper_reason="",
-                    diagnosis_started=session_data.get('diagnosis_started', True),
-                    ever_diagnosed=session_data.get('ever_diagnosed', False)
+                    diagnosis_started=session_data['diagnosis_started'],
+                    ever_diagnosed=session_data.get['ever_diagnosed']
                 )
 
                 _run_session(initial_state=state)
