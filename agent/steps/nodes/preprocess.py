@@ -11,13 +11,18 @@ from agent.memory.chroma import search
 # The function that is passed to LangGraph and is responsible for the Node
 
 def run(state: AgentState) -> dict:
+    if not state['messages']:
+        return {"semantic_search": [], "clinical_profile": "", "all_skills": {}}
+
     user_message = state['messages'][0].content # Load User Message
     all_skills = {}
 
-    with open(user_skills_index(ACTIVE_USER), "r") as file: # Load Skills Index
-        for line in file.readlines():
-            entry = json.loads(line.strip())
-            all_skills.update(entry)
+    index_path = user_skills_index(ACTIVE_USER) # Load Skills Index
+    if index_path.exists():
+        with open(index_path, "r") as file:
+            for line in file.readlines():
+                entry = json.loads(line.strip())
+                all_skills.update(entry)
 
     with open(user_profile(ACTIVE_USER), "r") as file: # Load Clinical Profile
         clinical_profile = file.read()

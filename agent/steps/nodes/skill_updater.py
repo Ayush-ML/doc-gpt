@@ -8,6 +8,7 @@ from pathlib import Path
 from agent.main.state import AgentState
 from agent.config import user_skills_dir, user_skills_index, ACTIVE_USER
 from agent.main.router import get_agent
+from agent.utils import sanitize_filename
 from agent.steps.prompts import SKILL_WRITER_PROMPT, SESSION_TITLE_PROMPT
 from agent.memory.chroma import write_memory, session_exists
 from langchain_core.messages import HumanMessage
@@ -54,10 +55,12 @@ def run(state: AgentState) -> dict:
     # Get Response from Agent
     response = (agent.invoke(context)).content
     if isinstance(response, list):
-                response_content = " ".join(
-                    block.get("text", "") for block in response
-                    if isinstance(block, dict) and "text" in block
-                )
+        response_content = " ".join(
+            block.get("text", "") for block in response
+            if isinstance(block, dict) and "text" in block
+        )
+    else:
+        response_content = response
 
     # Parse Skills and make File Containing Skills
 
@@ -67,7 +70,7 @@ def run(state: AgentState) -> dict:
         summary = skill["summary"]
         content = skill["content"]
         
-        skill_path = Path(user_skills_dir(ACTIVE_USER)) / f"{title}.md"
+        skill_path = Path(user_skills_dir(ACTIVE_USER)) / f"{sanitize_filename(title)}.md"
         skill_path.parent.mkdir(parents=True, exist_ok=True) # Create File
         skill_path.write_text(content) # Write Skill Content to the File
 

@@ -16,7 +16,7 @@ from agent.main.router import get_agent
 from agent.main.state import AgentState
 from agent.utils import id
 from agent.steps.prompts import CONVERSATION_PROMPT, SESSION_TITLE_PROMPT
-import tomli_w, typer, json, shutil, tomllib
+import tomli_w, typer, json, shutil, tomllib, re
 from datetime import datetime
 import traceback
 
@@ -62,6 +62,9 @@ def init() -> None:
 
         while True:
             name = console.input(f" Please Enter your Username: ").strip()
+            if not re.match(r'^[a-zA-Z0-9_-]+$', name):
+                console.print("  [red]Username must only contain letters, numbers, hyphens, and underscores.[/]")
+                continue
             if names:
                 if name in names:
                     console.print(f"  [red]Username already exists. Please choose a different name.[/]")
@@ -443,6 +446,9 @@ def skills(skill_name = typer.Argument(None)) -> None:
                 console.print(f"  [cyan]→ {skill}[/]")
                 console.print(f"  [white]→ {summary}[/]")
                 console.print()
+            return None
+
+        if skill_name:
             skill_path = user_skills_dir(ACTIVE_USER) / f"{skill_name}.md"
             if not skill_path.exists():
                 console.print(f"[red]Skill '{skill_name}' not found.[/]")
@@ -796,7 +802,7 @@ def sessions(session_title: str = typer.Argument(None)) -> None:
                     gatekeeper_decision=False,
                     gatekeeper_reason="",
                     diagnosis_started=session_data['diagnosis_started'],
-                    ever_diagnosed=session_data.get['ever_diagnosed']
+                    ever_diagnosed=session_data.get('ever_diagnosed', False)
                 )
 
                 _run_session(initial_state=state)

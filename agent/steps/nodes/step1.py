@@ -83,7 +83,7 @@ def run(state: AgentState) -> dict:
         if hasattr(response, 'tool_calls') and response.tool_calls:
             # Execute each tool call
             for tool_call in response.tool_calls:
-                tool_name = tool_call['type']
+                tool_name = tool_call['name']
                 tool_input = tool_call.get('args', {})
                 
                 try:

@@ -28,20 +28,25 @@ def drug_lookup(drug_name: str) -> dict | str:
         dict containing drug purpose, warnings, adverse effects and interactions
     """
     # Set The URL where requests fetch's the data
-    url = "https://api.fda.gov/drug/label.json" 
+    url = "https://api.fda.gov/drug/label.json"
 
-    # Search for the drug by Drug name
-    params = {'search': f'openfda.brand_name:"{drug_name}"', 'limit': 1}
+    # Search for the drug by brand or generic name
+    params = {
+        'search': f'openfda.brand_name:"{drug_name}" OR openfda.generic_name:"{drug_name}"',
+        'limit': 3
+    }
 
     try:
         response = requests.get(url, params=params)
         if response.status_code == 200:
             data = response.json()
+            if not data.get('results'):
+                return {"error": f"No results found for drug: {drug_name}"}
             results = data['results'][0]
         else:
-            return "API Error"
+            return {"error": f"FDA API returned status {response.status_code}"}
     except requests.exceptions.RequestException:
-        return "Request failed"
+        return {"error": "Drug lookup request failed"}
     
     return {
     "spl_product_data_elements": results.get("spl_product_data_elements", "Not available"),

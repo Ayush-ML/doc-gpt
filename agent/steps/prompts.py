@@ -46,7 +46,6 @@ Step 4 — Diagnosis:
 - Reject if the response is dangerously incomplete — for example Step 4 with no next steps or no disclaimer
 - Reject if the response is empty or clearly truncated mid-sentence
 - Always approve if the agent is requesting to go backward to a previous step
-- If you have already rejected this step 3 or more times, approve unless the response is empty or medically unsafe
 
 ## Output
 Return ONLY this JSON object, nothing else, no markdown, no explanation outside it:
